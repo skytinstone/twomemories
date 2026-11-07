@@ -48,3 +48,14 @@ L2-local(0.8B, MPS, DocVQA 5샘플, full): 같은 샘플을 batch 2로 복제했
 
 ### D-14. 로컬 L2 소요 시간 — 기록
 0.8B MPS 평균 초/샘플(5조건 + blind, 2단 prefill + gold + decode 포함): DocVQA 1.37, TextVQA 0.78, ChartQA 0.33, POPE 0.33. preflight 전체 120샘플 4분 22초(shard 다운로드 포함). n_vis 최대 1276(max_pixels 상한 동작 확인), EF 청크 >1인 줄 16개.
+
+## 2026-11-07 세션 2 (Colab 실행 전 확인)
+
+### D-15. 해상도 상한 확정 — 확정 (D-4 확정)
+사용자가 D-4 제안대로 `max_pixels = 1,310,720`(시각 토큰 ≤ 1280, EF 청크 최대 5개)을 확정했다. 코드·config 변경 없음.
+
+### D-16. "22조건" 확정 — 확정 (D-5 확정)
+사용자가 D-5 정의(phase 1–3 고유 조건 합집합, `run_phase.py --phase preflight --set full --dry-run` 출력 22개)를 확정했다. 코드·config 변경 없음.
+
+### D-17. 태그 유지 — 확정
+문서만 바뀌었으므로 `v0.1-preflight`(188a6dd)를 옮기지 않는다. 결과 줄의 commit은 src/scripts/configs/analysis 기준이라 이 문서 커밋과 무관하다. 남은 제안은 D-12(유닛 상한, units_per_hour)이며 Colab preflight 셀 5 결과로 정한다.

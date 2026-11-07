@@ -1,0 +1,454 @@
+% The Image Lives in Two Memories -- draft.
+% Results are placeholders (\TBD) until phases 1-4 are merged from results/v0.2-main.
+% Every number outside \TBD comes from the code, the model configs or docs/assumptions.md.
+\documentclass[10pt,twocolumn]{article}
+\usepackage[a4paper,margin=2cm,columnsep=0.7cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amsthm}   % before newtxmath (\openbox clash)
+\usepackage{newtxtext,newtxmath}
+\usepackage{booktabs,multirow,array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{caption}
+\captionsetup{font=small}
+
+\newcommand{\TBD}[1]{\textcolor{red}{[TBD: #1]}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\NLL}{\mathrm{NLL}}
+\newcommand{\ret}{\mathcal{R}}
+\newcommand{\vis}{\mathcal{V}}
+\newtheorem{remark}{Remark}
+
+\title{\Large\bfseries The Image Lives in Two Memories:\\ Visual Information in Hybrid Linear-Attention Vision-Language Models}
+\author{Minseok Shin\\
+\small Horcrux Technologies, Seoul, Republic of Korea\\
+\small \url{https://www.horcruxtechnologies.com}\\
+\small \texttt{horcruxtech.ai@gmail.com}\quad\texttt{stevenshin16@korea.ac.kr}}
+\date{}
+
+\begin{document}
+\twocolumn[
+\maketitle
+\begin{center}\begin{minipage}{0.86\textwidth}
+\textbf{Abstract.}\;
+Hybrid vision-language models that interleave linear-attention layers with softmax attention read an image into
+two memories at once: the key-value (KV) rows of the visual tokens in the attention layers, and a fixed-size
+recurrent state in the linear-attention layers that has absorbed every visual token. Visual-token pruning and
+multimodal KV-cache compression assume that the image lives in the first of these. We ask where it actually lives.
+On Qwen3.5 (Gated DeltaNet hybrids, 4B and 9B, early fusion) we alter one memory exactly once, right after the last
+image token, and let the question and the answer read the altered memory. A dataset-level ratio of teacher-forced
+answer losses, anchored at a no-image run and an unaltered run, measures how much of the image's contribution each
+memory retains, with paired bootstrap intervals, on DocVQA, ChartQA, TextVQA and POPE.
+\TBD{one sentence per finding: (i) KV zero vs state zero retained, per task family; (ii) bits needed by each memory
+after reading, with and without error feedback; (iii) fewer visual tokens versus fewer bits at equal memory;
+(iv) whether 9B agrees.}
+\par\smallskip
+\textbf{Keywords:} vision-language models; hybrid linear attention; Gated DeltaNet; KV cache; recurrent state;
+visual token pruning; quantization; interpretability.
+\end{minipage}\end{center}
+\vspace{1em}
+]
+
+\section{Introduction}
+
+A transformer vision-language model (VLM) keeps everything it has read about an image in one place: the keys and
+values of the visual tokens, one row per token and layer. Visual-token pruning
+\citep{chen2024fastv,zhang2025sparsevlm,shang2025prumerge,yang2025visionzip,xing2025pyramiddrop} and multimodal
+KV-cache compression \citep{wan2024lookm,tu2025vlcache} are built on that picture: removing or compressing a visual
+token's row removes or compresses what the model knows about that part of the image.
+
+Hybrid models break the picture. Qwen3.5 \citep{qwen2026qwen35} repeats three Gated DeltaNet (GDN) layers
+\citep{yang2025gdn} and one gated softmax-attention layer, and it is natively multimodal: visual features enter
+at the input embedding and pass through the same stack as text (early fusion; Section~\ref{sec:arch}). When the
+last image token has been processed, the image has been written into two memories. The attention layers hold the
+KV rows of the visual tokens, as in a transformer. The GDN layers hold a fixed-size recurrent state that has been
+updated by every visual token and is not indexed by token at all. In our setting this state is larger than the
+visual KV rows of any image we feed (Section~\ref{sec:sizes}).
+
+Which of the two memories does the model consult when it answers a question about the image? The answer decides
+what token pruning and KV compression can safely do to a hybrid VLM, and whether the recurrent state, which a
+serving engine stores at full precision regardless of the KV format \citep{vllm2026fp8kv}, is a place where image
+information can be lost. It is not obvious a priori. The state is written by every visual token but has a finite
+capacity and forgets through a learned decay; the KV rows keep every token exactly but sit in only one layer in
+four.
+
+We answer the question with training-free interventions. The prompt is read in two stages: the prefix and the
+image first, then the question (Section~\ref{sec:twostage}). Between the stages we alter exactly one memory once:
+we zero it, quantize it, or replace it by matched noise, or we remove visual tokens before they are read. The
+question and the answer then read the altered memory. We measure the effect with the teacher-forced loss of the
+reference answer, normalised between a run without the image and an unaltered run (Section~\ref{sec:metric}), so
+that $1$ means the altered memory still supplies everything the image contributed and $0$ means nothing is left.
+
+Two text-only studies of the same model family frame the question. Split-prefill experiments on Qwen3.5 and
+Falcon-H1 keep only the KV cache or only the recurrent state of a prefilled context and find that exact retrieval
+survives only through attention, while the output language and a persona survive through the recurrent state
+\citep{afendulev2026recalls}. Quantizing both memories at every write found the recurrent state to be the fragile
+one under long generation \citep{shin2026hybridquant}. Neither involves images. An image differs from a text
+context in two ways that matter here: it is long (up to 1,280 tokens in our setting) and dense, and the questions
+asked about it range from reading a single word (DocVQA, TextVQA) to judging whether an object is present at all
+(POPE). The retrieval-versus-gist split of \citep{afendulev2026recalls} predicts that reading tasks depend on the
+KV rows and presence judgements less so; our tasks test that prediction for visual content. For hybrid
+Mamba--Transformer video models, token reduction has been found to behave like compression rather than dropping
+because the state keeps information from discarded tokens \citep{jiang2026stateful}; we measure that state
+contribution directly, for still images and Gated DeltaNet.
+
+\paragraph{Contributions.}
+\TBD{Final bullets after phases 1--4. Planned:}
+\begin{itemize}\setlength\itemsep{1pt}
+\item A one-shot intervention protocol for hybrid VLMs that separates the two memories at the end of the image
+span, with a dataset-level retained ratio and paired bootstrap intervals (Sections~\ref{sec:twostage}--\ref{sec:metric}).
+\item \TBD{Phase 1: which memory carries the image, per task (zero and noise interventions).}
+\item \TBD{Phase 2: bits each memory needs after reading; error feedback during the image prefill; one-shot versus
+every-write quantization.}
+\item \TBD{Phase 3: visual-token deletion versus KV quantization at equal memory.}
+\item \TBD{Phase 4: replication at 9B.}
+\end{itemize}
+
+\section{Related Work}
+
+\paragraph{Visual-token reduction.}
+FastV drops visual tokens after an early layer on the evidence of low attention to them \citep{chen2024fastv};
+SparseVLM ranks visual tokens with text-guided attention \citep{zhang2025sparsevlm}; LLaVA-PruMerge and VisionZip
+select and merge tokens at the vision encoder output \citep{shang2025prumerge,yang2025visionzip}; PyramidDrop
+removes tokens progressively with depth \citep{xing2025pyramiddrop}; token merging goes back to ToMe
+\citep{bolya2023tome}. All of these are designed and evaluated on transformer language backbones, where the
+visual-token rows are the only memory of the image.
+\TBD{verified citations from the literature check; add any hybrid/linear-VLM pruning work it finds.}
+
+\paragraph{Multimodal KV-cache compression.}
+LOOK-M and VL-Cache compress the KV cache of multimodal inputs with modality-aware eviction and budget allocation
+\citep{wan2024lookm,tu2025vlcache}. KV quantization for text, e.g.\ KIVI \citep{liu2024kivi} and KVQuant
+\citep{hooper2024kvquant}, applies unchanged to the visual rows we quantize.
+
+\paragraph{Where visual information flows.}
+Attention-knockout studies of transformer VLMs trace how image information reaches the answer position by
+blocking attention between token groups in chosen layers
+\citep{kaduri2025whats,zhang2025crossmodal,neo2025interpreting}. \TBD{one verified sentence per paper.} A
+hybrid model adds a route these studies cannot see: the recurrent state carries information forward without
+attention.
+
+\paragraph{The two memories of hybrid models.}
+Afendulev et al.\ separate the KV cache and the recurrent state of text contexts by keeping one and dropping the
+other (the convolution cache is dropped with the state) and by swapping states between contexts
+\citep{afendulev2026recalls}. We differ in the input (an image span inside the prompt, followed by the question),
+in the interventions (graded: quantization, error feedback, matched noise and token deletion besides removal) and
+in the measure (a loss ratio anchored at no-image and full runs). Hybrid video models have used the state as
+evidence for which visual tokens to keep: as a carrier of discarded tokens \citep{jiang2026stateful} and, through
+its change over a chunk, as a query-free eviction signal for the KV cache \citep{kwon2026deltas}.
+
+\paragraph{Linear and hybrid VLMs; recurrent-state compression.}
+Mamba-based VLMs replace the language backbone by a state-space model \citep{zhao2025cobra,qiao2024vlmamba};
+there the state is the only memory of the image. Post-training quantization of the recurrent state of GDN and
+related layers has been studied for text \citep{zhang2026damp,yao2026stepquant,pan2026leapquant}, and jointly with
+the KV cache in \citep{shin2026hybridquant}. None of these isolates the image.
+
+\section{Background}
+
+\subsection{Qwen3.5 as a hybrid VLM}\label{sec:arch}
+Qwen3.5 has $L$ decoder layers in repeating groups of three GDN layers and one gated softmax-attention layer, so
+$L_a = L/4$ attention and $L_g = 3L/4$ GDN layers. For the 4B and 9B models $L=32$, $L_a=8$, $L_g=24$
+(Table~\ref{tab:geometry}).
+
+\paragraph{Early fusion.} A vision encoder with patch size $p=16$ and $m\times m$ spatial merging ($m=2$) turns an
+image resized to $H\times W$ pixels (both multiples of $pm=32$) into
+\begin{equation}
+n_v = \frac{H}{p}\cdot\frac{W}{p}\cdot\frac{1}{m^2} = \frac{HW}{(pm)^2}
+\label{eq:nv}
+\end{equation}
+visual tokens, which replace $n_v$ placeholder tokens in the input embedding. In the transformers implementation we
+use, this scatter at the input embedding is the only place where visual features enter the language model; no
+visual features are injected at intermediate layers (Appendix~\ref{app:premises}, premise 1). Visual tokens get
+three-dimensional rotary positions (temporal, height, width; M-RoPE \citep{wang2024qwen2vl}) on the first quarter
+of each attention head's dimensions. We cap the image at $HW \le 1{,}310{,}720$ pixels, so $n_v \le 1{,}280$.
+
+\subsection{Gated DeltaNet}\label{sec:gdn}
+Each GDN head keeps a matrix $S_t\in\R^{d_k\times d_v}$. With L2-normalised key $k_t\in\R^{d_k}$, query
+$q_t\in\R^{d_k}$ (further scaled by $d_k^{-1/2}$), value $v_t\in\R^{d_v}$, decay $\alpha_t\in(0,1)$ and write
+strength $\beta_t\in(0,1)$, computed per head from the input at $t$ as
+$\alpha_t=\exp\!\big(-e^{A}\,\mathrm{softplus}(a_t+b)\big)$ and $\beta_t=\mathrm{sigmoid}(\beta'_t)$ with $a_t,\beta'_t$
+linear in the input and $A,b$ learned, the state is first decayed and then corrected along $k_t$:
+\begin{align}
+S_t &= \alpha_t S_{t-1} + \beta_t\, k_t\big(v_t - \alpha_t S_{t-1}^{\top}k_t\big)^{\top} \nonumber\\
+    &= \alpha_t\big(I-\beta_t k_t k_t^{\top}\big)S_{t-1} + \beta_t\, k_t v_t^{\top}, \label{eq:gdn}\\
+o_t &= S_t^{\top} q_t. \label{eq:gdnout}
+\end{align}
+This is the order of operations of the reference recurrence in the implementation (decay, read
+$(\alpha_tS_{t-1})^{\top}k_t$, write). Prefill computes the same recurrence in chunks, but the state is written to
+the cache once per forward call, at its end (premise 5). Before the recurrence, $q,k,v$ pass through a causal
+depthwise convolution of kernel size $\omega=4$ whose cache holds the last inputs; we return to it in
+Section~\ref{sec:caveats}.
+
+\subsection{Two memories and their sizes}\label{sec:sizes}
+With $H_{kv}$ KV heads of dimension $d$ per attention layer and $H$ GDN value heads, a sequence of $T$ tokens
+leaves
+\begin{equation}
+|\mathrm{KV}|(T) = 2L_aH_{kv}d\,T, \qquad |S| = L_gHd_kd_v
+\label{eq:sizes}
+\end{equation}
+elements in the two memories (the factor 2 counts keys and values). The implementation stores the KV cache in the
+model dtype (bf16, 16 bits) and the recurrent state in fp32 (32 bits; premise 3). For 4B and 9B,
+$|\mathrm{KV}|(T)=16{,}384\,T$ and $|S|=24\cdot32\cdot128\cdot128=12{,}582{,}912$, i.e.\ 32.8\,kB of KV per token
+and a 50.3\,MB state. The visual rows of an image therefore occupy $0.0328\,n_v$\,MB, at most 41.9\,MB at
+$n_v=1{,}280$, and the two are equal only at
+\begin{equation}
+n_v^{\star} = \frac{32\,|S|}{16\cdot 2L_aH_{kv}d} = 1{,}536
+\label{eq:crossover}
+\end{equation}
+visual tokens. Every image in this study leaves a state larger than its own KV rows. (The crossover of 768 tokens
+in \citep{shin2026hybridquant} counts the state in bf16; the implementation used here keeps it in fp32.)
+
+\begin{table}[t]
+\centering\small
+\caption{Cache geometry, from the model configurations. Sizes by \eqref{eq:sizes}; KV in bf16, state in fp32.}
+\label{tab:geometry}
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{lcccccccc}
+\toprule
+Model & $L$ & $L_a$ & $L_g$ & $H_{kv}$ & $d$ & $H$ & $d_k{=}d_v$ & $|S|$ (MB) \\
+\midrule
+Qwen3.5-4B & 32 & 8 & 24 & 4 & 256 & 32 & 128 & 50.3 \\
+Qwen3.5-9B & 32 & 8 & 24 & 4 & 256 & 32 & 128 & 50.3 \\
+\bottomrule
+\end{tabular}\\[2pt]
+\footnotesize GDN key heads: 16; value heads $H=32$; the state is per value head. Vision encoder: patch 16,
+merge 2; depth 24 (4B), 27 (9B).
+\end{table}
+
+\section{Method}
+
+\subsection{Two-stage prefill and the intervention point}\label{sec:twostage}
+A prompt is the token sequence $x = (P,\vis,Q)$: a prefix $P$ (chat template up to and including the
+vision-start token), the image span $\vis=\{s,\dots,e-1\}$ of $n_v=e-s$ placeholder positions carrying the visual
+features, and the question $Q$ (vision-end token, question, instruction and the assistant header). Let
+$\mathcal{M}_e$ be the state of all caches after the first $e$ tokens:
+\begin{equation}
+\mathcal{M}_e = \big(\{K^{\ell}_{1:e},V^{\ell}_{1:e}\}_{\ell\in\mathcal{A}},\ \{S^{\ell}_e,\,C^{\ell}_e\}_{\ell\in\mathcal{G}}\big),
+\end{equation}
+with $\mathcal{A}$, $\mathcal{G}$ the attention and GDN layers and $C^{\ell}_e$ the convolution cache. Stage~1 runs
+$(P,\vis)$ with unaltered computation. An intervention $\phi$ maps $\mathcal{M}_e$ to $\phi(\mathcal{M}_e)$. Stage~2
+runs $Q$ on $\phi(\mathcal{M}_e)$ without further alteration; the reference answer is then scored by teacher forcing
+on a copy of the resulting cache, and a greedy answer of at most 16 tokens is decoded on the original. Because
+nothing is altered after the image, any effect of $\phi$ is an effect on what the image left behind. All
+conditions, including the unaltered one, use the same two-stage path. \TBD{report the two-stage vs single-pass
+check on 4B (Colab), not the local 0.8B check.}
+
+\subsection{Interventions}\label{sec:interventions}
+\paragraph{KV side.} For every attention layer, the rows of the visual positions are replaced,
+$K^{\ell}_{\vis}\leftarrow f(K^{\ell}_{\vis})$ and $V^{\ell}_{\vis}\leftarrow f(V^{\ell}_{\vis})$, with
+$f\in\{\mathrm{id},\,Q_4,\,N_4,\,0\}$. Rows of $P$ are not touched, and rows of $Q$ are written later by stage~2.
+Keys are cached after the rotary embedding, so $f$ acts on rotated keys.
+
+\paragraph{State side.} For every GDN layer, $S^{\ell}_e\leftarrow g(S^{\ell}_e)$ with
+$g\in\{\mathrm{id},\,Q_8,\,Q_6,\,Q_8^{\mathrm{EF}},\,Q_6^{\mathrm{EF}},\,N_8,\,0\}$. The convolution cache
+$C^{\ell}_e$ is never altered.
+
+\paragraph{Quantizer.} $Q_b$ is asymmetric uniform round-to-nearest with one scale and zero point per group of
+$G=128$ consecutive elements along the last dimension (the head dimension $d=256$ for keys and values, two groups
+per head and token; $d_v$ for the state, one group per row $S[h,i,:]$). For a group $x\in\R^{G}$,
+\begin{equation}
+\begin{gathered}
+\sigma = \frac{\max x-\min x}{2^b-1},\qquad z = \big\lfloor -\min x/\sigma \big\rceil,\\
+Q_b(x) = \sigma\Big(\mathrm{clamp}\big(\lfloor x/\sigma\rceil + z,\,0,\,2^b-1\big) - z\Big),
+\end{gathered}
+\label{eq:quant}
+\end{equation}
+where $\lfloor\cdot\rceil$ rounds to the nearest integer and $\sigma$ is floored at $10^{-8}$. Quantization is
+simulated in fp32 and cast back to the cache dtype.
+
+\paragraph{Matched noise.} $N_b$ adds Gaussian noise with the energy of $b$-bit quantization error but none of its
+structure. For a cache tensor $X$ (one layer's visual keys, values, or state),
+\begin{equation}
+N_b(X) = X + \rho_b(X)\,Z,\quad \rho_b(X) = \sqrt{\tfrac{1}{|X|}\textstyle\sum\big(Q_b(X)-X\big)^2},
+\label{eq:noise}
+\end{equation}
+with $Z$ standard normal entries of the shape of $X$. The generator is re-seeded (seed 0) for every tensor, so
+tensors of the same shape receive the same $Z$, across layers and samples, scaled by their own $\rho_b$. The RMS
+$\rho_b$ is taken over the whole tensor, so noise is spread uniformly where quantization error is concentrated
+in high-range groups.
+
+\paragraph{Error feedback during the image.} Quantizing the state once after the image ($Q_b$ above) commits one
+rounding error. With error feedback the image is read in chunks of at most 256 visual tokens, with boundaries
+$s=e_0<e_1<\dots<e_C=e$, $C=\lceil n_v/256\rceil\le 5$. Let $\hat S_{e_u}$ be the state after running chunk $u$
+from the stored state $\tilde S_{e_{u-1}}$, with $\tilde S_{e_0}=S_s$ the unaltered state after the prefix. Then
+\begin{equation}
+\tilde S_{e_u} = Q_b\big(\hat S_{e_u} + r_{u-1}\big),\quad r_u = \hat S_{e_u} + r_{u-1} - \tilde S_{e_u},
+\label{eq:ef}
+\end{equation}
+with $r_0=0$; the final residual $r_C$ is discarded and $\tilde S_{e}$ is what the question reads. Each chunk is a
+separate forward call, because the state is written once per call (premise 5). For $n_v\le 256$, $C=1$ and
+$Q_b^{\mathrm{EF}}=Q_b$. Error feedback here therefore acts across at most five stores, unlike decoding in
+\citep{shin2026hybridquant}, where it acts across every generated token.
+
+\paragraph{Zeroing.} $f=0$ sets visual keys and values to zero; $g=0$ sets every GDN state to zero.
+Section~\ref{sec:caveats} states precisely what each removes and what it leaves.
+
+\paragraph{Visual-token deletion.} A keep set $I\subset\{0,\dots,n_v-1\}$ of size $n_v'=\max(1,\mathrm{round}(\kappa
+n_v))$, $\kappa\in\{0.5,0.25\}$, is chosen uniformly, $I=\{\lfloor j\,n_v/n_v'\rfloor : j=0,\dots,n_v'-1\}$, or at random
+without replacement (seed 0). The other visual tokens are removed from the input before the language model, so
+neither memory ever sees them; the kept tokens keep their original M-RoPE positions, and the vision encoder still
+sees the full image. Deletion shrinks the visual KV rows to $n_v'$ and leaves $|S|$ unchanged.
+
+\paragraph{Every-write quantization.} For comparison with \citep{shin2026hybridquant} we also quantize every KV
+append and every state write of the whole run, prefill and decoding, with the hooks of that work (scope
+\emph{whole}); here the image and the text are quantized alike. \TBD{state the exact EF reset semantics of the
+whole scope under the two-stage prefill.}
+
+\subsection{Retained ratio}\label{sec:metric}
+Let the reference answer have tokens $a_{1:m}$. For sample $i$ under condition $c$,
+\begin{equation}
+\NLL_i(c) = -\frac{1}{m}\sum_{j=1}^{m}\log p_c\big(a_j \mid x,\, a_{<j}\big),
+\end{equation}
+where $p_c$ reads the memory produced by condition $c$. Two anchors use the same prompt: \emph{full} (image,
+no alteration) and \emph{blind} (no image: the image span and its start and end tokens are removed). With
+$\bar N(c)=\frac1n\sum_i\NLL_i(c)$ over a task's $n$ samples, the retained ratio is
+\begin{equation}
+\ret(c) = \frac{\bar N(\mathrm{blind})-\bar N(c)}{\bar N(\mathrm{blind})-\bar N(\mathrm{full})}.
+\label{eq:retained}
+\end{equation}
+$\ret=1$: the altered memory supplies the full reduction in answer loss that the image provides; $\ret=0$: none of
+it; $\ret<0$: worse than no image. $\ret$ is a ratio of dataset means, not a mean of per-sample ratios, whose
+denominators can be near zero. It is defined when $\bar N(\mathrm{blind})>\bar N(\mathrm{full})$, which we check
+per task before reporting. The 95\% interval is a paired percentile bootstrap \citep{efron1993bootstrap}: 2,000
+resamples of sample indices with replacement (seed 0), the same indices for the three means; resamples with a zero
+denominator are dropped.
+
+\paragraph{Reference answers and task scores.} The reference for the loss is the first answer (DocVQA), the most
+frequent of the ten annotator answers (TextVQA), or the single answer (ChartQA, POPE). Greedy answers are scored
+with ANLS at $\tau=0.5$ \citep{biten2019stvqa} (DocVQA), relaxed accuracy with 5\% relative tolerance
+\citep{methani2020plotqa,masry2022chartqa} (ChartQA), VQA accuracy
+$\frac{1}{10}\sum_{i=1}^{10}\min\!\big(1,\tfrac13\#\{j\neq i: a^{(j)}=\hat a\}\big)$ \citep{antol2015vqa} (TextVQA),
+and yes/no accuracy and F1 with \emph{yes} as the positive class (POPE), all after one shared normalisation
+(lower case; punctuation except decimal points and percent signs removed; articles removed).
+
+\subsection{Memory accounting}\label{sec:budget}
+For the equal-memory comparison we charge a condition
+\begin{equation}
+\mathrm{MB}(c) = \frac{b_{kv}\,|\mathrm{KV}|(n_v'+n_t) + b_s\,|S|}{8\cdot 10^{6}},
+\label{eq:mb}
+\end{equation}
+with $n_v'$ the visual tokens kept, $n_t$ the text tokens, $b_{kv}\in\{16,4,0\}$ (full, 4-bit, zero) and
+$b_s\in\{32,8,6,0\}$; noise is charged at its matched bit-width. This is deployment accounting: all KV rows are
+charged at $b_{kv}$, although the one-shot intervention leaves the text rows at 16 bits. Scales and zero points
+(about $32/G=0.25$ bits per element for fp16 pairs) and the convolution cache are not counted.
+
+\subsection{Caveats of the interventions}\label{sec:caveats}
+\paragraph{Zeroed keys still take attention.} A zero key gives the logit $q^{\top}0/\sqrt{d}=0$, not $-\infty$, so
+each zeroed visual position keeps a softmax weight $w_i=1/\mathcal{Z}$, with $\mathcal{Z}$ the softmax normaliser of the
+query, and contributes the zero value. The attention output becomes $\sum_{i\notin\vis}w_iv_i$ with
+$\sum_{i\notin\vis}w_i = 1-n_v/\mathcal{Z}<1$: KV zero removes the visual
+content and also shrinks the attention output by the mass the zeroed rows absorb. Masking the visual positions
+would remove the content and renormalise; \citep{afendulev2026recalls} avoid zero keys for this reason.
+\TBD{decide whether to add a KV-drop condition (visual rows removed from the cache); until then KV zero is read as
+removal plus attention dilution.}
+
+\paragraph{The convolution cache leaks the last visual tokens.} Unlike \citep{afendulev2026recalls}, who drop the
+convolution cache together with the state, we leave it in place, following \citep{shin2026hybridquant}. $C^{\ell}_e$ holds the inputs of the last positions
+of the span, and the causal convolution of kernel $\omega=4$ mixes them into the GDN inputs of the first $\omega-1=3$
+tokens after the span. State zero therefore leaves a short local channel from the last three visual tokens into the
+first question-side tokens (and, through their hidden states, into everything above them).
+
+\paragraph{State zero also forgets the prefix.} $S^{\ell}_e$ summarises $P$ as well as $\vis$; zeroing it removes
+both. The prefix is the fixed chat-template header, the same for every sample.
+
+\section{Experimental Setup}\label{sec:setup}
+\paragraph{Models.} Qwen3.5-4B (phases 1--3) and Qwen3.5-9B (phase 4), bf16 weights, the post-trained (non-base)
+checkpoints. GDN runs in the library's PyTorch kernels. \TBD{confirm from the Colab environment that no fla kernel
+path was taken, and report torch/transformers versions recorded in the result rows.}
+
+\paragraph{Data.} Fixed random subsets (seed 0) of DocVQA validation (200) \citep{mathew2021docvqa}, ChartQA test
+(200) \citep{masry2022chartqa}, TextVQA validation (200) \citep{singh2019textvqa} and POPE (300) \citep{li2023pope},
+from the lmms-lab copies used by lmms-eval \citep{zhang2025lmmseval} at pinned revisions; the sample ids are released.
+Every question gets the same instruction, ``Answer the question using a single word or phrase.'', in the default
+chat template without a system prompt; the template closes an empty thinking block before the answer
+(non-thinking mode).
+
+\paragraph{Conditions.} Phase 1 (which memory): $f\in\{\mathrm{id},Q_4,N_4,0\}$ with the state unaltered;
+$g\in\{Q_8,Q_8^{\mathrm{EF}},Q_6,Q_6^{\mathrm{EF}},N_8,0\}$ with the KV unaltered; and both zeroed. Phase 2 (bits):
+the state levels alone and with $f=Q_4$, and the two every-write cells (KV4 with $Q_8$ and $Q_8^{\mathrm{EF}}$).
+Phase 3 (tokens versus bits): $\kappa\in\{1,0.5,0.25\}$ uniform, with KV at 16 or 4 bits, and $\kappa=0.5$ random.
+Phase 4 (9B): full, KV zero, state zero, KV4 with $Q_8^{\mathrm{EF}}$, and $\kappa=0.5$ uniform. Each condition
+also has the two anchors per task. Batch size 1 and greedy decoding throughout.
+
+\paragraph{Compute.} One NVIDIA A100-SXM4-80GB on Google Colab. A 4B preflight (22 conditions $\times$ 4 tasks
+$\times$ 5 samples) took 1.47\,s per sample on average, with a peak of 9.3\,GB of GPU memory. \TBD{total GPU hours
+and compute units per phase.}
+
+\section{Results}
+\subsection{Which memory carries the image}\label{sec:res-probe}
+\TBD{Figure: retained per condition and task with 95\% CIs (paper/figures/retained\_Qwen3.5-4B.pdf). Table:
+phase-1 retained. Text: KV zero vs state zero; KV noise vs KV4; state noise vs state 8 (structure vs energy, cf.\
+the noise control in \citep{shin2026hybridquant}); both zeroed versus blind (should be near 0 unless the conv leak
+carries information).}
+
+\subsection{How many bits each memory needs after reading}\label{sec:res-bits}
+\TBD{State 8/6 with and without EF, alone and with KV4. EF only differs from RTN for $n_v>256$: report $n_v$
+distribution per task and split by $C$. One-shot vs every-write.}
+
+\subsection{Fewer visual tokens or fewer bits}\label{sec:res-tokens}
+\TBD{Table at matched MB by \eqref{eq:mb}: $\kappa=0.5$ at 16 bits vs $\kappa=1$ at 4 bits (KV rows of the image
+$0.5\times16$ vs $1\times4$ bits per element). Uniform vs random.}
+
+\subsection{Scale}\label{sec:res-scale}
+\TBD{9B vs 4B on the five phase-4 conditions.}
+
+\subsection{Task scores}\label{sec:res-scores}
+\TBD{ANLS / relaxed accuracy / VQA accuracy / POPE F1 per condition; does the ordering agree with $\ret$?}
+
+\section{Discussion and Limitations}
+\TBD{Practical reading for pruning and KV compression of hybrid VLMs.}
+\paragraph{Limitations.} (i) KV zero keeps softmax mass on the zeroed rows and state zero leaves the convolution
+cache (Section~\ref{sec:caveats}); neither is a perfect deletion. (ii) Each intervention acts once, after the
+image; it does not model a cache that stays quantized while the answer is generated, except for the two
+every-write cells. (iii) $\ret$ is measured with the loss of one reference answer per sample; the task scores
+check that it tracks answer quality, but a reference that the model would phrase differently inflates both anchors.
+(iv) Subsets of 200--300 samples per task, one model family at two sizes, one image resolution cap.
+(v) Quantization is simulated; no memory or speed is saved in these runs.
+
+\section{Conclusion}
+\TBD{after results.}
+
+\section*{Acknowledgments}
+This work was carried out by a single author without institutional funding; compute was self-funded on Google
+Colab. The author used Claude (Anthropic) as an assistant for code development and manuscript editing; all
+experiments, analyses and claims were designed, run and verified by the author.
+
+\section*{Reproducibility and Data Availability}
+Code, configurations, subset ids, raw per-sample results and the scripts that regenerate every table and figure
+are at \url{https://github.com/skytinstone/twomemories} \TBD{make public at submission}. Each phase is run by
+\texttt{python scripts/run\_phase.py --phase <name>}, the tables by \texttt{python analysis/make\_tables.py} and the
+figures by \texttt{python analysis/figures.py}. Quantization uses the released \texttt{hybridquant} package
+\citep{shin2026hybridquant} unchanged. All datasets are public.
+
+\bibliographystyle{unsrtnat}
+\bibliography{refs}
+
+\appendix
+\onecolumn
+\section{Implementation premises}\label{app:premises}
+Checked against transformers 5.22.2 (Qwen3.5 modeling and cache code) before any run; file and line references
+are in \texttt{docs/assumptions.md} of the repository.
+\begin{center}\small
+\begin{tabular}{p{0.04\textwidth}p{0.42\textwidth}p{0.44\textwidth}}
+\toprule
+& Premise & Consequence for the method \\
+\midrule
+1 & Visual features are scattered into the input embedding only; no intermediate-layer injection. &
+The caches after the span (KV, state, convolution cache) are the only carriers of the image. \\
+2 & The image is one contiguous span of placeholder tokens of length $\prod(\text{grid})/m^2$. &
+$\vis$ is known exactly; \eqref{eq:nv}. \\
+3 & The recurrent state is stored in fp32 (PyTorch path). & State charged at 32 bits; \eqref{eq:crossover}. \TBD{GPU path}. \\
+4 & The cache is a \texttt{DynamicCache} with attention and linear-attention layers; the write methods hooked by
+\texttt{hybridquant} exist unchanged. & No adapter; every-write cells use the hooks as released. \\
+5 & Prefill computes GDN in 64-token chunks internally but writes the state once per forward call. &
+Error feedback during the image needs one forward call per 256-token chunk \eqref{eq:ef}. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Full results}\label{app:results}
+\TBD{generated by analysis/make\_tables.py from results/**/*.jsonl.}
+
+\end{document}

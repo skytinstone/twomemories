@@ -4,7 +4,7 @@
 
 | GPU | cells | samples | sec | sec/sample | units (est.) | peak VRAM GB |
 |---|---|---|---|---|---|---|
-| NVIDIA A100-SXM4-80GB | 139 | 11014 | 15421 | 1.40 | 38.04 | 9.3 |
+| NVIDIA A100-SXM4-80GB | 163 | 16294 | 23531 | 1.44 | 58.04 | 9.3 |
 
 ## Table 2: 충실도 × 태스크, retained [95% CI] / fidelity x task
 

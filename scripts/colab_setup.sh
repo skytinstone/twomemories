@@ -13,7 +13,7 @@ set -euo pipefail
 OWNER=skytinstone
 DRIVE=/content/drive/MyDrive/twomemories
 WORK=/content
-REF=${TWOMEM_REF:-v0.1.1-preflight}
+REF=${TWOMEM_REF:-v0.2-main}
 HF_LOCAL=/content/hf_cache
 
 if [ ! -d /content/drive/MyDrive ]; then

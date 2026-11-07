@@ -28,3 +28,15 @@
 ## 2026-11-07 맥 작업 사고 기록
 
 run_all.sh 이어하기 시뮬레이션 중 임시 clone이 실패한 채 명령이 이어져, 실제 레포에서 테스트용 sed와 run_all이 실행됐다. 가짜 결과 6줄(`results/m/...`)이 원격 브랜치 `results/0432a52`로 push됐다. 확인 후 브랜치를 삭제하고 run_all.sh를 되돌렸다. main과 태그는 영향 없음. 이후 시뮬레이션은 `set -e` 서브셸, 로컬 bare 원격, `GH_TOKEN` 제거로 다시 했다.
+
+## 2026-11-07 Colab preflight 2차 (v0.1.1-preflight, 완료)
+
+| 항목 | 값 |
+|---|---|
+| GPU | NVIDIA A100-SXM4-80GB, 8.88 유닛/시간(리소스 패널) |
+| 셀 | compute_log 91셀(기대 92). 빠진 1셀은 1차 실행의 DocVQA blind 기록으로 추정. 1차의 `_tag_phase`가 Drive 위에서 compute_log를 다시 쓰다 잃은 것으로 보이나 UNVERIFIED. 결과 jsonl은 덧붙이기만 하므로 영향 없음 |
+| 속도 | 1.47 s/sample(행 기준 평균). blind 0.87, EF 1.66–1.99, 토큰 삭제 1.34–1.37 |
+| VRAM 피크 | 9.3 GB |
+| 유닛 | preflight 1.64 |
+
+상한은 D-25.

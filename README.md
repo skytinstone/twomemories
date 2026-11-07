@@ -34,7 +34,7 @@ python scripts/run_phase.py --phase preflight --limit 5 --out results/local   # 
 1. GitHub fine-grained PAT 발급: 저장소 `twomemories`, `hybridquant` 두 개만, 권한 Contents read/write, 만료 90일. Colab 왼쪽 열쇠(Secrets)에 이름 `GH_TOKEN`으로 등록하고 노트북 접근 허용. 토큰 값은 레포·문서·셀에 적지 않는다.
 2. Google Drive에 `MyDrive/twomemories/` 폴더가 없어도 된다(setup이 `results/`를 만든다). HF 캐시는 Drive가 아니라 Colab 로컬 디스크 `/content/hf_cache`에 두며 세션마다 다시 받는다(D-18).
 3. Colab에서 `notebooks/colab_runner.ipynb`를 연다(GitHub 탭, 비공개 레포 접근 허용). 런타임 GPU 선택.
-4. 셀 1–5 실행: Drive 마운트 → setup → `v0.1.1-preflight` 체크아웃 → 4B preflight(22조건 × 4태스크 × 5샘플) → 셀당 초, VRAM 피크, phase별 예상 유닛.
+4. 셀 1–5 실행: Drive 마운트 → setup → `v0.2-main` 체크아웃 → 4B preflight(22조건 × 4태스크 × 5샘플) → 셀당 초, VRAM 피크, phase별 예상 유닛.
 5. 5번 결과를 보고 승인한 뒤에만 셀 6에서 `APPROVED = True`로 바꿔 실행한다. `run_all.sh`가 백그라운드로 phase 1→4를 돌고, phase마다 결과와 표·그림(`paper/tables/<모델>/`, `paper/figures/retained_<모델>.{pdf,png}`, `paper/report_<모델>.md`)을 `results/<tag>` 브랜치로 push한다. 로그는 `MyDrive/twomemories/logs/run_all.log`.
 6. 셀 7(모니터)을 켜 둔다. 3초마다 전체·phase별 진행률(%), 현재 단계, 완료 예정 시각(KST), 유닛/상한, 최근 셀(마지막 줄 이후 경과 초), GPU, 로그 끝 줄을 보여준다. 셀 7을 멈춰도 실험은 계속된다. 셀 8은 실험 중지.
 

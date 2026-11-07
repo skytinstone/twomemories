@@ -84,3 +84,9 @@ L2-local(0.8B, MPS, DocVQA 5샘플, full): 같은 샘플을 batch 2로 복제했
 
 ### D-24. phase마다 표·그림 생성, 논문은 맥에서 — 확정
 `run_all.sh`가 phase마다 결과 브랜치 worktree에서 `make_tables`, `figures`(pdf + png), `report`를 모델별로 돌려 `paper/`에 넣고 함께 push한다(CPU, 수 초). 논문용 최종 표·그림은 맥에서 병합 후 다시 만든다(hybridquant와 같은 `paper/figures`, `paper/tables` 구조).
+
+### D-25. phase별 유닛 상한 — 확정 (D-12 확정, 수치 변경)
+근거: Colab 4B preflight(A100-SXM4-80GB, 91셀 × 5샘플). 행 기준 평균 1.47 s/sample(blind 0.87, EF 조건 1.66–1.99), VRAM 피크 9.3 GB, preflight 1.64 유닛. 셀 5의 dry-run 추정(39.1 / 42.4 / 26.1 / 53.3)은 앞 phase와 겹치는 셀을 다시 세고, 9B에는 기본 4.0 s를 썼다. 새로 도는 셀만 세면 4B phase 1–3이 39.2 / 19.6 / 16.3 유닛(8.4 h)이다. 9B는 4B 시간의 1.5–2.25배(파라미터 비)를 가정해 29–44 유닛(3.3–5 h)이다. 9B 배율은 UNVERIFIED이며 phase 4 첫 셀 이후 모니터 속도로 확인한다. 상한은 추정의 약 1.5배: 60 / 30 / 25 / 70(preflight 15 포함 합계 200). 추정은 행 seconds 기준이라 모델 로드·다운로드 시간은 빠지고, 상한 판정도 같은 기준이다. 남는 약 140유닛의 사용(subset 확대 등)은 phase 1 결과의 CI 폭을 보고 정한다. `sec_per_sample_guess`는 9B 사전 추정 3.3 s(1.47 × 2.25)로 바꿨다.
+
+### D-26. 본 실험 태그 `v0.2-main` — 확정
+v0.1.1-preflight 이후 변경(이어하기, 모니터, phase별 표·그림, 상한)을 담은 태그다. 노트북 셀 2·3과 `colab_setup.sh`의 기본 ref를 v0.2-main으로 바꿨다. runner 변경(append_jsonl, phase 태그)은 결과 줄의 필드와 cell_hash를 바꾸지 않으므로 v0.1.1-preflight의 preflight 결과는 그대로 이어 쓴다(셀 4 재실행 시 전부 skip). 셀 6·7은 status.py가 없는 체크아웃이면 셀 2·3을 다시 돌리라고 안내하고 멈춘다(Colab 오류 `No module named 'status'`).

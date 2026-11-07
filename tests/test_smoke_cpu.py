@@ -209,6 +209,12 @@ def test_subset_order_preserved(tmp_path, monkeypatch):
     monkeypatch.setattr(data, "_shard_path", lambda task, f: str(tmp_path / f))
     got = [s["sample_id"] for s in data.iter_samples("pope", subset_dir=tmp_path)]
     assert got == [ids[r] for r in order]
+    # a truncated cached shard (e.g. an interrupted write) is downloaded again with force_download
+    (tmp_path / "bad.parquet").write_bytes((tmp_path / "shard.parquet").read_bytes()[:100])
+    monkeypatch.setattr(data, "_shard_path",
+                        lambda task, f, force=False: str(tmp_path / ("shard.parquet" if force else "bad.parquet")))
+    got = [s["sample_id"] for s in data.iter_samples("pope", subset_dir=tmp_path)]
+    assert got == [ids[r] for r in order]
     with pytest.raises(FileNotFoundError):
         data.load_subset("docvqa", subset_dir=tmp_path)
 

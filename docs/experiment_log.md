@@ -14,3 +14,13 @@
 | C3 | `python scripts/check_l2.py` | 8db117f79e | greedy 5/5 동일, batch2 최대 차이 7.2e-3 → batch 1 고정(D-13) |
 
 로컬 수치는 경로 검증용이며 논문에 쓰지 않는다.
+
+## 2026-11-07 Colab preflight 1차 (v0.1-preflight, 중단)
+
+| 단계 | 결과 |
+|---|---|
+| 셀 2 setup | 완료. 리소스 패널 약 8.88 유닛/시간, GPU RAM 80 GB |
+| 셀 4 preflight | 4B DocVQA blind 셀 5샘플 완료(0.46 s/sample, VRAM 피크 8.7 GB) 후 KVfull_Sfull 셀에서 Drive 캐시 parquet 손상으로 중단(D-18) |
+| 셀 5 요약 | dry-run 루프 `{ph}` 미확장(D-20). 사용 유닛 약 3.2(설치·다운로드 포함) |
+
+수정 후 `v0.1.1-preflight`로 재실행. blind DocVQA 5줄은 cell_hash가 같아 resume으로 건너뛴다(그 줄의 commit은 188a6dd).

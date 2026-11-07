@@ -59,3 +59,12 @@ L2-local(0.8B, MPS, DocVQA 5샘플, full): 같은 샘플을 batch 2로 복제했
 
 ### D-17. 태그 유지 — 확정
 문서만 바뀌었으므로 `v0.1-preflight`(188a6dd)를 옮기지 않는다. 결과 줄의 commit은 src/scripts/configs/analysis 기준이라 이 문서 커밋과 무관하다. 남은 제안은 D-12(유닛 상한, units_per_hour)이며 Colab preflight 셀 5 결과로 정한다.
+
+### D-18. HF 캐시를 Drive에서 Colab 로컬 디스크로 — 확정 (작업 지시 이탈)
+작업 지시는 HF 캐시를 Drive에 두라고 했다. Colab preflight(v0.1-preflight)에서 DocVQA blind 셀은 `validation-00000-of-00006.parquet`을 읽었는데, 바로 다음 셀이 Drive 마운트로 같은 파일을 다시 읽자 `ArrowInvalid: Parquet magic bytes not found in footer`가 났다. Drive 마운트를 거친 큰 파일 쓰기/읽기가 잘린 것으로 본다(원인 세부는 UNVERIFIED). 조치: (1) `HF_HOME=/content/hf_cache`(로컬 디스크). 세션마다 모델·shard를 다시 받는다. (2) `data._read_shard`가 파싱에 실패한 캐시 shard를 `force_download`로 한 번 다시 받는다(백엔드 무관). 결과(jsonl, compute_log)는 그대로 Drive에 쓴다. Drive의 `MyDrive/twomemories/hf_cache`는 더 쓰지 않으니 지워도 된다.
+
+### D-19. A100 시간당 유닛 8.88 — 확정 (D-12 일부)
+같은 세션의 Colab 리소스 패널: "사용률 약 8.88/시간"(Pro+, GPU RAM 80 GB, 시스템 RAM 167 GB). `configs/compute.yaml`의 A100 값을 11.8 → 8.88로 고쳤다. GPU 이름이 A100인지는 셀 2 출력 `GPU:` 줄로 확인할 것(자리값 표에서 A100과 default가 모두 11.8이라 셀 5의 11.80만으로는 구분 불가, UNVERIFIED). phase별 상한(D-12 나머지)은 preflight 완료 후 정한다.
+
+### D-20. 노트북 셀 5 dry-run 루프를 subprocess로 — 확정
+`!... --phase {ph} ... "$TWOMEM_RESULTS"`에서 IPython이 `$TWOMEM_RESULTS`를 파이썬 변수로 확장하려다 실패하면 줄 전체를 확장하지 않아 `{ph}`가 그대로 넘어갔다(`configs/{ph}.yaml` 없음). `subprocess.run(['bash', '-c', ...])`로 바꿨다. 셀 4는 `{}`가 없어 영향 없음.

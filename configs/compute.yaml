@@ -1,9 +1,9 @@
 # Colab compute units per hour by GPU name substring (matched case-insensitively against torch.cuda.get_device_name).
-# UNVERIFIED placeholders: read the real rate from the Colab "Resources" panel after the first preflight
-# and correct these values in a commit (docs/decision_log.md). mps/cpu are local and cost 0.
+# A100: Colab "Resources" panel rate, 2026-11-07 (Pro+, 80 GB GPU, high-RAM runtime), docs/decision_log.md D-19.
+# The other GPU rates are UNVERIFIED placeholders. mps/cpu are local and cost 0.
 units_per_hour:
   H100: 15.0
-  A100: 11.8
+  A100: 8.88
   L4: 4.8
   T4: 1.8
   mps: 0.0

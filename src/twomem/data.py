@@ -77,16 +77,26 @@ def load_subset(task: str, subset_dir: Path | None = None) -> dict:
     return json.loads(path.read_text())
 
 
-def _shard_path(task: str, file: str) -> str:
+def _shard_path(task: str, file: str, force: bool = False) -> str:
     from huggingface_hub import hf_hub_download
 
     spec = DATASETS[task]
-    return hf_hub_download(spec["repo"], file, repo_type="dataset", revision=spec["revision"])
+    return hf_hub_download(spec["repo"], file, repo_type="dataset", revision=spec["revision"], force_download=force)
+
+
+def _read_shard(task: str, file: str):
+    """Read one parquet shard; a cached copy that fails to parse (truncated write) is downloaded once more."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    try:
+        return pq.read_table(_shard_path(task, file))
+    except (pa.ArrowInvalid, OSError):
+        return pq.read_table(_shard_path(task, file, force=True))
 
 
 def iter_samples(task: str, n_limit: int | None = None, subset_dir: Path | None = None):
     """Yield samples in the subset file's order: dict(sample_id, image, question, prompt, gold, answers, meta)."""
-    import pyarrow.parquet as pq
     from PIL import Image
 
     sub = load_subset(task, subset_dir)
@@ -94,7 +104,7 @@ def iter_samples(task: str, n_limit: int | None = None, subset_dir: Path | None 
     cur_file, table = None, None
     for it in items:
         if it["file"] != cur_file:
-            table = pq.read_table(_shard_path(task, it["file"]))
+            table = _read_shard(task, it["file"])
             cur_file = it["file"]
         row = table.slice(it["row"], 1).to_pylist()[0]
         rid = row[DATASETS[task]["id_col"]] if DATASETS[task]["id_col"] else f"{task}-{it['index']}"

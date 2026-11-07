@@ -32,9 +32,9 @@ python scripts/run_phase.py --phase preflight --limit 5 --out results/local   # 
 ## Colab 실행 절차
 
 1. GitHub fine-grained PAT 발급: 저장소 `twomemories`, `hybridquant` 두 개만, 권한 Contents read/write, 만료 90일. Colab 왼쪽 열쇠(Secrets)에 이름 `GH_TOKEN`으로 등록하고 노트북 접근 허용. 토큰 값은 레포·문서·셀에 적지 않는다.
-2. Google Drive에 `MyDrive/twomemories/` 폴더가 없어도 된다(setup이 `hf_cache/`, `results/`를 만든다).
+2. Google Drive에 `MyDrive/twomemories/` 폴더가 없어도 된다(setup이 `results/`를 만든다). HF 캐시는 Drive가 아니라 Colab 로컬 디스크 `/content/hf_cache`에 두며 세션마다 다시 받는다(D-18).
 3. Colab에서 `notebooks/colab_runner.ipynb`를 연다(GitHub 탭, 비공개 레포 접근 허용). 런타임 GPU 선택.
-4. 셀 1–5 실행: Drive 마운트 → setup → `v0.1-preflight` 체크아웃 → 4B preflight(22조건 × 4태스크 × 5샘플) → 셀당 초, VRAM 피크, phase별 예상 유닛.
+4. 셀 1–5 실행: Drive 마운트 → setup → `v0.1.1-preflight` 체크아웃 → 4B preflight(22조건 × 4태스크 × 5샘플) → 셀당 초, VRAM 피크, phase별 예상 유닛.
 5. 5번 결과를 보고 승인한 뒤에만 셀 6(`run_all.sh --from 1`)을 수동 실행한다. phase마다 결과가 `results/<tag>` 브랜치로 push된다.
 
 Colab에서는 코드를 고치지 않는다. 수정은 맥에서 하고 새 태그를 push한 뒤 셀 3에서 다시 체크아웃한다.

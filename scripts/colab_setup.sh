@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Colab setup. Run from a notebook cell after mounting Drive:
 #   GH_TOKEN=... bash scripts/colab_setup.sh      (the notebook reads GH_TOKEN from Colab secrets)
-# Clones twomemories and hybridquant with GH_TOKEN, installs both editable, puts the HF cache on Drive and
+# Clones twomemories and hybridquant with GH_TOKEN, installs both editable, puts the HF cache on the local disk,
 # makes runs write results straight to Drive (TWOMEM_RESULTS), and records the GPU.
+# The HF cache is not on Drive: a parquet shard read back through the Drive mount came back truncated
+# (docs/decision_log.md, D-18). Models and shards are re-downloaded once per session instead.
 # results/ is not a symlink: git would commit the link instead of the jsonl files. run_all.sh rsyncs
 # Drive -> results/ before each commit (docs/decision_log.md, D-7).
 set -euo pipefail
@@ -11,13 +13,14 @@ set -euo pipefail
 OWNER=skytinstone
 DRIVE=/content/drive/MyDrive/twomemories
 WORK=/content
-REF=${TWOMEM_REF:-v0.1-preflight}
+REF=${TWOMEM_REF:-v0.1.1-preflight}
+HF_LOCAL=/content/hf_cache
 
 if [ ! -d /content/drive/MyDrive ]; then
   echo "Drive is not mounted (run drive.mount('/content/drive') first)" >&2
   exit 1
 fi
-mkdir -p "$DRIVE/hf_cache" "$DRIVE/results"
+mkdir -p "$HF_LOCAL" "$DRIVE/results"
 
 clone() {  # name -> /content/name; the token is used for the fetch only and not stored in .git/config
   local name=$1
@@ -43,10 +46,10 @@ git config user.email "horcruxtech.ai@gmail.com"
 
 pip install -q -e "$WORK/hybridquant" -e "$WORK/twomemories"
 
-# HF cache on Drive; hub kernels off so GatedDeltaNet keeps calling cache.update_recurrent_state
+# HF cache on the local disk; hub kernels off so GatedDeltaNet keeps calling cache.update_recurrent_state
 # (see hybridquant.check_hook_coverage and docs/assumptions.md, premise 3).
 cat > /content/twomem_env.sh <<EOF
-export HF_HOME=$DRIVE/hf_cache
+export HF_HOME=$HF_LOCAL
 export TWOMEM_RESULTS=$DRIVE/results
 export USE_HUB_KERNELS=NO
 export TOKENIZERS_PARALLELISM=false

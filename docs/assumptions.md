@@ -171,7 +171,7 @@
 <!-- L1:start -->
 ## L1 결과
 
-`scripts/check_l1.py`, 모델 Qwen/Qwen3.5-0.8B, device=mps, commit unknown, 총 5.8s. 값은 기록만 하고 해석하지 않는다.
+`scripts/check_l1.py`, 모델 Qwen/Qwen3.5-0.8B, device=mps, commit 7324e17434, 총 5.9s. 값은 기록만 하고 해석하지 않는다.
 
 - (a) input_ids=(1, 218) vis_span=(4, 200) n_vis=196 n_text=22 image_grid_thw=[[1, 28, 28]] pixel_values=(784, 1536)
 - (b) unhooked two-stage gold NLL/token = 0.052222; stock single-pass model(**inputs) = 0.056059 (|diff| 3.84e-03, bf16 split vs one pass)
@@ -181,11 +181,11 @@
 | run | n_vis | gold NLL/token | pred | score | state_calls | kv_calls | n_chunks | sec |
 |---|---|---|---|---|---|---|---|---|
 | full (hooks on, pass-through) | 196 | 0.0522 | 'TWO MEMORIES 2026' | 1.00 | 216 | 72 | 1 | 0.53 |
-| blind | 0 | 4.3306 | "I don't see an image in your message. Could you please upload or describe" | 0.00 | 306 | 102 | 0 | 0.48 |
-| kv zero | 196 | 3.3459 | 'The text written in the image is:\n\n**“The text is written in' | 0.00 | 324 | 108 | 1 | 0.69 |
-| state zero | 196 | 0.0470 | 'TWO MEMORIES 2026' | 1.00 | 216 | 72 | 1 | 0.53 |
+| blind | 0 | 4.3306 | "I don't see an image in your message. Could you please upload or describe" | 0.00 | 306 | 102 | 0 | 0.47 |
+| kv zero | 196 | 3.3459 | 'The text written in the image is:\n\n**“The text is written in' | 0.00 | 324 | 108 | 1 | 0.68 |
+| state zero | 196 | 0.0470 | 'TWO MEMORIES 2026' | 1.00 | 216 | 72 | 1 | 0.52 |
 | kv4 / state8ef | 196 | 0.0671 | 'TWO MEMORIES 2026' | 1.00 | 234 | 78 | 1 | 0.56 |
-| full, 1024px image | 1024 | 3.7295 | 'MINOR' | 0.00 | 90 | 30 | 1 | 1.14 |
+| full, 1024px image | 1024 | 3.7295 | 'MINOR' | 0.00 | 90 | 30 | 1 | 1.15 |
 | state 8ef, 1024px image | 1024 | 3.7506 | 'MINOR' | 0.00 | 162 | 54 | 4 | 1.23 |
 
 <!-- L1:end -->

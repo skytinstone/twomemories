@@ -1,0 +1,16 @@
+# Preflight: plumbing check, not results. "local" = 5 conditions on the Mac (0.8B, --limit 5);
+# "full" = the 22 distinct conditions of phases 1-3 on Colab (4B, --limit 5) to time every code path.
+phase: preflight
+models: [Qwen/Qwen3.5-0.8B]
+tasks: [docvqa, chartqa, textvqa, pope]
+max_pixels: 1310720
+default_set: local
+condition_sets:
+  local:
+    - {kv: full, state: full}
+    - {kv: zero, state: full}
+    - {kv: full, state: zero}
+    - {kv: "4", state: 8ef}
+    - {kv: "4", state: "8", scope: whole}
+  full: [phase1_probe, phase2_bits, phase3_tokens]   # union of distinct conditions of these phases
+stop_rule: Any schema error, hook count of 0, or exception stops the run.

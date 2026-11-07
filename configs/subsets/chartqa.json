@@ -1,0 +1,1211 @@
+{
+ "task": "chartqa",
+ "dataset": "lmms-lab/ChartQA",
+ "revision": "9e63b7df1592a1c2158e735cc1725454aef0d6d9",
+ "split_prefix": "data/test-",
+ "seed": 0,
+ "n_total": 2500,
+ "n": 200,
+ "items": [
+  {
+   "sample_id": "chartqa-6",
+   "index": 6,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 6
+  },
+  {
+   "sample_id": "chartqa-12",
+   "index": 12,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 12
+  },
+  {
+   "sample_id": "chartqa-19",
+   "index": 19,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 19
+  },
+  {
+   "sample_id": "chartqa-36",
+   "index": 36,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 36
+  },
+  {
+   "sample_id": "chartqa-38",
+   "index": 38,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 38
+  },
+  {
+   "sample_id": "chartqa-40",
+   "index": 40,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 40
+  },
+  {
+   "sample_id": "chartqa-51",
+   "index": 51,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 51
+  },
+  {
+   "sample_id": "chartqa-66",
+   "index": 66,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 66
+  },
+  {
+   "sample_id": "chartqa-78",
+   "index": 78,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 78
+  },
+  {
+   "sample_id": "chartqa-94",
+   "index": 94,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 94
+  },
+  {
+   "sample_id": "chartqa-116",
+   "index": 116,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 116
+  },
+  {
+   "sample_id": "chartqa-118",
+   "index": 118,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 118
+  },
+  {
+   "sample_id": "chartqa-122",
+   "index": 122,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 122
+  },
+  {
+   "sample_id": "chartqa-125",
+   "index": 125,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 125
+  },
+  {
+   "sample_id": "chartqa-141",
+   "index": 141,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 141
+  },
+  {
+   "sample_id": "chartqa-173",
+   "index": 173,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 173
+  },
+  {
+   "sample_id": "chartqa-187",
+   "index": 187,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 187
+  },
+  {
+   "sample_id": "chartqa-190",
+   "index": 190,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 190
+  },
+  {
+   "sample_id": "chartqa-191",
+   "index": 191,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 191
+  },
+  {
+   "sample_id": "chartqa-201",
+   "index": 201,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 201
+  },
+  {
+   "sample_id": "chartqa-204",
+   "index": 204,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 204
+  },
+  {
+   "sample_id": "chartqa-208",
+   "index": 208,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 208
+  },
+  {
+   "sample_id": "chartqa-220",
+   "index": 220,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 220
+  },
+  {
+   "sample_id": "chartqa-257",
+   "index": 257,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 257
+  },
+  {
+   "sample_id": "chartqa-284",
+   "index": 284,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 284
+  },
+  {
+   "sample_id": "chartqa-291",
+   "index": 291,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 291
+  },
+  {
+   "sample_id": "chartqa-296",
+   "index": 296,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 296
+  },
+  {
+   "sample_id": "chartqa-319",
+   "index": 319,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 319
+  },
+  {
+   "sample_id": "chartqa-328",
+   "index": 328,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 328
+  },
+  {
+   "sample_id": "chartqa-362",
+   "index": 362,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 362
+  },
+  {
+   "sample_id": "chartqa-371",
+   "index": 371,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 371
+  },
+  {
+   "sample_id": "chartqa-404",
+   "index": 404,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 404
+  },
+  {
+   "sample_id": "chartqa-409",
+   "index": 409,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 409
+  },
+  {
+   "sample_id": "chartqa-457",
+   "index": 457,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 457
+  },
+  {
+   "sample_id": "chartqa-479",
+   "index": 479,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 479
+  },
+  {
+   "sample_id": "chartqa-481",
+   "index": 481,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 481
+  },
+  {
+   "sample_id": "chartqa-485",
+   "index": 485,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 485
+  },
+  {
+   "sample_id": "chartqa-543",
+   "index": 543,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 543
+  },
+  {
+   "sample_id": "chartqa-557",
+   "index": 557,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 557
+  },
+  {
+   "sample_id": "chartqa-568",
+   "index": 568,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 568
+  },
+  {
+   "sample_id": "chartqa-575",
+   "index": 575,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 575
+  },
+  {
+   "sample_id": "chartqa-604",
+   "index": 604,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 604
+  },
+  {
+   "sample_id": "chartqa-606",
+   "index": 606,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 606
+  },
+  {
+   "sample_id": "chartqa-621",
+   "index": 621,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 621
+  },
+  {
+   "sample_id": "chartqa-631",
+   "index": 631,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 631
+  },
+  {
+   "sample_id": "chartqa-643",
+   "index": 643,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 643
+  },
+  {
+   "sample_id": "chartqa-696",
+   "index": 696,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 696
+  },
+  {
+   "sample_id": "chartqa-700",
+   "index": 700,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 700
+  },
+  {
+   "sample_id": "chartqa-709",
+   "index": 709,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 709
+  },
+  {
+   "sample_id": "chartqa-725",
+   "index": 725,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 725
+  },
+  {
+   "sample_id": "chartqa-735",
+   "index": 735,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 735
+  },
+  {
+   "sample_id": "chartqa-760",
+   "index": 760,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 760
+  },
+  {
+   "sample_id": "chartqa-767",
+   "index": 767,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 767
+  },
+  {
+   "sample_id": "chartqa-784",
+   "index": 784,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 784
+  },
+  {
+   "sample_id": "chartqa-806",
+   "index": 806,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 806
+  },
+  {
+   "sample_id": "chartqa-810",
+   "index": 810,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 810
+  },
+  {
+   "sample_id": "chartqa-851",
+   "index": 851,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 851
+  },
+  {
+   "sample_id": "chartqa-858",
+   "index": 858,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 858
+  },
+  {
+   "sample_id": "chartqa-890",
+   "index": 890,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 890
+  },
+  {
+   "sample_id": "chartqa-894",
+   "index": 894,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 894
+  },
+  {
+   "sample_id": "chartqa-898",
+   "index": 898,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 898
+  },
+  {
+   "sample_id": "chartqa-902",
+   "index": 902,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 902
+  },
+  {
+   "sample_id": "chartqa-904",
+   "index": 904,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 904
+  },
+  {
+   "sample_id": "chartqa-916",
+   "index": 916,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 916
+  },
+  {
+   "sample_id": "chartqa-919",
+   "index": 919,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 919
+  },
+  {
+   "sample_id": "chartqa-935",
+   "index": 935,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 935
+  },
+  {
+   "sample_id": "chartqa-943",
+   "index": 943,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 943
+  },
+  {
+   "sample_id": "chartqa-959",
+   "index": 959,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 959
+  },
+  {
+   "sample_id": "chartqa-962",
+   "index": 962,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 962
+  },
+  {
+   "sample_id": "chartqa-979",
+   "index": 979,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 979
+  },
+  {
+   "sample_id": "chartqa-989",
+   "index": 989,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 989
+  },
+  {
+   "sample_id": "chartqa-1002",
+   "index": 1002,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1002
+  },
+  {
+   "sample_id": "chartqa-1003",
+   "index": 1003,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1003
+  },
+  {
+   "sample_id": "chartqa-1024",
+   "index": 1024,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1024
+  },
+  {
+   "sample_id": "chartqa-1035",
+   "index": 1035,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1035
+  },
+  {
+   "sample_id": "chartqa-1042",
+   "index": 1042,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1042
+  },
+  {
+   "sample_id": "chartqa-1077",
+   "index": 1077,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1077
+  },
+  {
+   "sample_id": "chartqa-1084",
+   "index": 1084,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1084
+  },
+  {
+   "sample_id": "chartqa-1087",
+   "index": 1087,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1087
+  },
+  {
+   "sample_id": "chartqa-1125",
+   "index": 1125,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1125
+  },
+  {
+   "sample_id": "chartqa-1131",
+   "index": 1131,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1131
+  },
+  {
+   "sample_id": "chartqa-1153",
+   "index": 1153,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1153
+  },
+  {
+   "sample_id": "chartqa-1160",
+   "index": 1160,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1160
+  },
+  {
+   "sample_id": "chartqa-1164",
+   "index": 1164,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1164
+  },
+  {
+   "sample_id": "chartqa-1177",
+   "index": 1177,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1177
+  },
+  {
+   "sample_id": "chartqa-1204",
+   "index": 1204,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1204
+  },
+  {
+   "sample_id": "chartqa-1224",
+   "index": 1224,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1224
+  },
+  {
+   "sample_id": "chartqa-1225",
+   "index": 1225,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1225
+  },
+  {
+   "sample_id": "chartqa-1233",
+   "index": 1233,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1233
+  },
+  {
+   "sample_id": "chartqa-1245",
+   "index": 1245,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1245
+  },
+  {
+   "sample_id": "chartqa-1260",
+   "index": 1260,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1260
+  },
+  {
+   "sample_id": "chartqa-1264",
+   "index": 1264,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1264
+  },
+  {
+   "sample_id": "chartqa-1289",
+   "index": 1289,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1289
+  },
+  {
+   "sample_id": "chartqa-1298",
+   "index": 1298,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1298
+  },
+  {
+   "sample_id": "chartqa-1305",
+   "index": 1305,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1305
+  },
+  {
+   "sample_id": "chartqa-1361",
+   "index": 1361,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1361
+  },
+  {
+   "sample_id": "chartqa-1370",
+   "index": 1370,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1370
+  },
+  {
+   "sample_id": "chartqa-1380",
+   "index": 1380,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1380
+  },
+  {
+   "sample_id": "chartqa-1383",
+   "index": 1383,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1383
+  },
+  {
+   "sample_id": "chartqa-1403",
+   "index": 1403,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1403
+  },
+  {
+   "sample_id": "chartqa-1409",
+   "index": 1409,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1409
+  },
+  {
+   "sample_id": "chartqa-1417",
+   "index": 1417,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1417
+  },
+  {
+   "sample_id": "chartqa-1446",
+   "index": 1446,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1446
+  },
+  {
+   "sample_id": "chartqa-1464",
+   "index": 1464,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1464
+  },
+  {
+   "sample_id": "chartqa-1466",
+   "index": 1466,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1466
+  },
+  {
+   "sample_id": "chartqa-1483",
+   "index": 1483,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1483
+  },
+  {
+   "sample_id": "chartqa-1493",
+   "index": 1493,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1493
+  },
+  {
+   "sample_id": "chartqa-1500",
+   "index": 1500,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1500
+  },
+  {
+   "sample_id": "chartqa-1512",
+   "index": 1512,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1512
+  },
+  {
+   "sample_id": "chartqa-1519",
+   "index": 1519,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1519
+  },
+  {
+   "sample_id": "chartqa-1522",
+   "index": 1522,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1522
+  },
+  {
+   "sample_id": "chartqa-1535",
+   "index": 1535,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1535
+  },
+  {
+   "sample_id": "chartqa-1536",
+   "index": 1536,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1536
+  },
+  {
+   "sample_id": "chartqa-1552",
+   "index": 1552,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1552
+  },
+  {
+   "sample_id": "chartqa-1558",
+   "index": 1558,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1558
+  },
+  {
+   "sample_id": "chartqa-1573",
+   "index": 1573,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1573
+  },
+  {
+   "sample_id": "chartqa-1601",
+   "index": 1601,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1601
+  },
+  {
+   "sample_id": "chartqa-1616",
+   "index": 1616,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1616
+  },
+  {
+   "sample_id": "chartqa-1617",
+   "index": 1617,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1617
+  },
+  {
+   "sample_id": "chartqa-1626",
+   "index": 1626,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1626
+  },
+  {
+   "sample_id": "chartqa-1634",
+   "index": 1634,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1634
+  },
+  {
+   "sample_id": "chartqa-1659",
+   "index": 1659,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1659
+  },
+  {
+   "sample_id": "chartqa-1663",
+   "index": 1663,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1663
+  },
+  {
+   "sample_id": "chartqa-1689",
+   "index": 1689,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1689
+  },
+  {
+   "sample_id": "chartqa-1700",
+   "index": 1700,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1700
+  },
+  {
+   "sample_id": "chartqa-1704",
+   "index": 1704,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1704
+  },
+  {
+   "sample_id": "chartqa-1707",
+   "index": 1707,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1707
+  },
+  {
+   "sample_id": "chartqa-1708",
+   "index": 1708,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1708
+  },
+  {
+   "sample_id": "chartqa-1710",
+   "index": 1710,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1710
+  },
+  {
+   "sample_id": "chartqa-1716",
+   "index": 1716,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1716
+  },
+  {
+   "sample_id": "chartqa-1759",
+   "index": 1759,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1759
+  },
+  {
+   "sample_id": "chartqa-1781",
+   "index": 1781,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1781
+  },
+  {
+   "sample_id": "chartqa-1796",
+   "index": 1796,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1796
+  },
+  {
+   "sample_id": "chartqa-1807",
+   "index": 1807,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1807
+  },
+  {
+   "sample_id": "chartqa-1815",
+   "index": 1815,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1815
+  },
+  {
+   "sample_id": "chartqa-1817",
+   "index": 1817,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1817
+  },
+  {
+   "sample_id": "chartqa-1846",
+   "index": 1846,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1846
+  },
+  {
+   "sample_id": "chartqa-1853",
+   "index": 1853,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1853
+  },
+  {
+   "sample_id": "chartqa-1855",
+   "index": 1855,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1855
+  },
+  {
+   "sample_id": "chartqa-1865",
+   "index": 1865,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1865
+  },
+  {
+   "sample_id": "chartqa-1866",
+   "index": 1866,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1866
+  },
+  {
+   "sample_id": "chartqa-1878",
+   "index": 1878,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1878
+  },
+  {
+   "sample_id": "chartqa-1890",
+   "index": 1890,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1890
+  },
+  {
+   "sample_id": "chartqa-1894",
+   "index": 1894,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1894
+  },
+  {
+   "sample_id": "chartqa-1895",
+   "index": 1895,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1895
+  },
+  {
+   "sample_id": "chartqa-1904",
+   "index": 1904,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1904
+  },
+  {
+   "sample_id": "chartqa-1923",
+   "index": 1923,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1923
+  },
+  {
+   "sample_id": "chartqa-1939",
+   "index": 1939,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1939
+  },
+  {
+   "sample_id": "chartqa-1957",
+   "index": 1957,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1957
+  },
+  {
+   "sample_id": "chartqa-1973",
+   "index": 1973,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1973
+  },
+  {
+   "sample_id": "chartqa-1983",
+   "index": 1983,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1983
+  },
+  {
+   "sample_id": "chartqa-1994",
+   "index": 1994,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1994
+  },
+  {
+   "sample_id": "chartqa-1998",
+   "index": 1998,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 1998
+  },
+  {
+   "sample_id": "chartqa-2002",
+   "index": 2002,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2002
+  },
+  {
+   "sample_id": "chartqa-2014",
+   "index": 2014,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2014
+  },
+  {
+   "sample_id": "chartqa-2054",
+   "index": 2054,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2054
+  },
+  {
+   "sample_id": "chartqa-2055",
+   "index": 2055,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2055
+  },
+  {
+   "sample_id": "chartqa-2060",
+   "index": 2060,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2060
+  },
+  {
+   "sample_id": "chartqa-2069",
+   "index": 2069,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2069
+  },
+  {
+   "sample_id": "chartqa-2075",
+   "index": 2075,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2075
+  },
+  {
+   "sample_id": "chartqa-2108",
+   "index": 2108,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2108
+  },
+  {
+   "sample_id": "chartqa-2110",
+   "index": 2110,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2110
+  },
+  {
+   "sample_id": "chartqa-2113",
+   "index": 2113,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2113
+  },
+  {
+   "sample_id": "chartqa-2129",
+   "index": 2129,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2129
+  },
+  {
+   "sample_id": "chartqa-2148",
+   "index": 2148,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2148
+  },
+  {
+   "sample_id": "chartqa-2161",
+   "index": 2161,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2161
+  },
+  {
+   "sample_id": "chartqa-2165",
+   "index": 2165,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2165
+  },
+  {
+   "sample_id": "chartqa-2166",
+   "index": 2166,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2166
+  },
+  {
+   "sample_id": "chartqa-2169",
+   "index": 2169,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2169
+  },
+  {
+   "sample_id": "chartqa-2183",
+   "index": 2183,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2183
+  },
+  {
+   "sample_id": "chartqa-2192",
+   "index": 2192,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2192
+  },
+  {
+   "sample_id": "chartqa-2221",
+   "index": 2221,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2221
+  },
+  {
+   "sample_id": "chartqa-2223",
+   "index": 2223,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2223
+  },
+  {
+   "sample_id": "chartqa-2241",
+   "index": 2241,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2241
+  },
+  {
+   "sample_id": "chartqa-2247",
+   "index": 2247,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2247
+  },
+  {
+   "sample_id": "chartqa-2265",
+   "index": 2265,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2265
+  },
+  {
+   "sample_id": "chartqa-2288",
+   "index": 2288,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2288
+  },
+  {
+   "sample_id": "chartqa-2294",
+   "index": 2294,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2294
+  },
+  {
+   "sample_id": "chartqa-2295",
+   "index": 2295,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2295
+  },
+  {
+   "sample_id": "chartqa-2301",
+   "index": 2301,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2301
+  },
+  {
+   "sample_id": "chartqa-2307",
+   "index": 2307,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2307
+  },
+  {
+   "sample_id": "chartqa-2310",
+   "index": 2310,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2310
+  },
+  {
+   "sample_id": "chartqa-2318",
+   "index": 2318,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2318
+  },
+  {
+   "sample_id": "chartqa-2332",
+   "index": 2332,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2332
+  },
+  {
+   "sample_id": "chartqa-2336",
+   "index": 2336,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2336
+  },
+  {
+   "sample_id": "chartqa-2347",
+   "index": 2347,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2347
+  },
+  {
+   "sample_id": "chartqa-2376",
+   "index": 2376,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2376
+  },
+  {
+   "sample_id": "chartqa-2378",
+   "index": 2378,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2378
+  },
+  {
+   "sample_id": "chartqa-2385",
+   "index": 2385,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2385
+  },
+  {
+   "sample_id": "chartqa-2404",
+   "index": 2404,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2404
+  },
+  {
+   "sample_id": "chartqa-2407",
+   "index": 2407,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2407
+  },
+  {
+   "sample_id": "chartqa-2414",
+   "index": 2414,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2414
+  },
+  {
+   "sample_id": "chartqa-2427",
+   "index": 2427,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2427
+  },
+  {
+   "sample_id": "chartqa-2437",
+   "index": 2437,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2437
+  },
+  {
+   "sample_id": "chartqa-2440",
+   "index": 2440,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2440
+  },
+  {
+   "sample_id": "chartqa-2443",
+   "index": 2443,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2443
+  },
+  {
+   "sample_id": "chartqa-2462",
+   "index": 2462,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2462
+  },
+  {
+   "sample_id": "chartqa-2489",
+   "index": 2489,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2489
+  },
+  {
+   "sample_id": "chartqa-2494",
+   "index": 2494,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2494
+  },
+  {
+   "sample_id": "chartqa-2496",
+   "index": 2496,
+   "file": "data/test-00000-of-00001.parquet",
+   "row": 2496
+  }
+ ]
+}

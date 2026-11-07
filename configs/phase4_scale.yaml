@@ -1,0 +1,13 @@
+# Phase 4: does the split between the two memories hold at a larger scale? Key conditions only.
+phase: phase4_scale
+models: [Qwen/Qwen3.5-9B]
+tasks: [docvqa, chartqa, textvqa, pope]
+max_pixels: 1310720
+conditions:
+  - {kv: full, state: full}
+  - {kv: zero, state: full}
+  - {kv: full, state: zero}
+  - {kv: "4", state: 8ef}
+  - {kv: "4", state: full, token_keep: 0.5, token_method: uniform}
+stop_rule: >-
+  Run only if the phase cap still fits after phase 3 (run_phase --dry-run). Drop a task before dropping a condition.

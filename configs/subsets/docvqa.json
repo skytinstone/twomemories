@@ -1,0 +1,1211 @@
+{
+ "task": "docvqa",
+ "dataset": "lmms-lab/DocVQA",
+ "revision": "539088ef8a8ada01ac8e2e6d4e372586748a265e",
+ "split_prefix": "DocVQA/validation-",
+ "seed": 0,
+ "n_total": 5349,
+ "n": 200,
+ "items": [
+  {
+   "sample_id": "49177",
+   "index": 14,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 14
+  },
+  {
+   "sample_id": "57388",
+   "index": 27,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 27
+  },
+  {
+   "sample_id": "57411",
+   "index": 43,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 43
+  },
+  {
+   "sample_id": "57452",
+   "index": 78,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 78
+  },
+  {
+   "sample_id": "32891",
+   "index": 85,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 85
+  },
+  {
+   "sample_id": "32892",
+   "index": 86,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 86
+  },
+  {
+   "sample_id": "57523",
+   "index": 114,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 114
+  },
+  {
+   "sample_id": "16611",
+   "index": 147,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 147
+  },
+  {
+   "sample_id": "254",
+   "index": 173,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 173
+  },
+  {
+   "sample_id": "358",
+   "index": 211,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 211
+  },
+  {
+   "sample_id": "409",
+   "index": 254,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 254
+  },
+  {
+   "sample_id": "410",
+   "index": 256,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 256
+  },
+  {
+   "sample_id": "49574",
+   "index": 264,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 264
+  },
+  {
+   "sample_id": "57780",
+   "index": 274,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 274
+  },
+  {
+   "sample_id": "463",
+   "index": 307,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 307
+  },
+  {
+   "sample_id": "57951",
+   "index": 381,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 381
+  },
+  {
+   "sample_id": "612",
+   "index": 387,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 387
+  },
+  {
+   "sample_id": "57987",
+   "index": 413,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 413
+  },
+  {
+   "sample_id": "651",
+   "index": 416,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 416
+  },
+  {
+   "sample_id": "41688",
+   "index": 439,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 439
+  },
+  {
+   "sample_id": "41689",
+   "index": 440,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 440
+  },
+  {
+   "sample_id": "41721",
+   "index": 462,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 462
+  },
+  {
+   "sample_id": "789",
+   "index": 478,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 478
+  },
+  {
+   "sample_id": "50123",
+   "index": 557,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 557
+  },
+  {
+   "sample_id": "58400",
+   "index": 612,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 612
+  },
+  {
+   "sample_id": "58426",
+   "index": 636,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 636
+  },
+  {
+   "sample_id": "16499",
+   "index": 645,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 645
+  },
+  {
+   "sample_id": "60474",
+   "index": 704,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 704
+  },
+  {
+   "sample_id": "49077",
+   "index": 705,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 705
+  },
+  {
+   "sample_id": "50418",
+   "index": 790,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 790
+  },
+  {
+   "sample_id": "1263",
+   "index": 794,
+   "file": "DocVQA/validation-00000-of-00006.parquet",
+   "row": 794
+  },
+  {
+   "sample_id": "58788",
+   "index": 904,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 12
+  },
+  {
+   "sample_id": "5173",
+   "index": 910,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 18
+  },
+  {
+   "sample_id": "50741",
+   "index": 983,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 91
+  },
+  {
+   "sample_id": "50804",
+   "index": 1037,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 145
+  },
+  {
+   "sample_id": "57318",
+   "index": 1046,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 154
+  },
+  {
+   "sample_id": "59020",
+   "index": 1054,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 162
+  },
+  {
+   "sample_id": "59293",
+   "index": 1190,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 298
+  },
+  {
+   "sample_id": "51130",
+   "index": 1214,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 322
+  },
+  {
+   "sample_id": "51133",
+   "index": 1223,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 331
+  },
+  {
+   "sample_id": "59376",
+   "index": 1257,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 365
+  },
+  {
+   "sample_id": "59467",
+   "index": 1332,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 440
+  },
+  {
+   "sample_id": "51285",
+   "index": 1337,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 445
+  },
+  {
+   "sample_id": "18564",
+   "index": 1383,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 491
+  },
+  {
+   "sample_id": "2187",
+   "index": 1390,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 498
+  },
+  {
+   "sample_id": "59571",
+   "index": 1433,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 541
+  },
+  {
+   "sample_id": "59653",
+   "index": 1499,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 607
+  },
+  {
+   "sample_id": "474",
+   "index": 1554,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 662
+  },
+  {
+   "sample_id": "18819",
+   "index": 1576,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 684
+  },
+  {
+   "sample_id": "51597",
+   "index": 1586,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 694
+  },
+  {
+   "sample_id": "59823",
+   "index": 1619,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 727
+  },
+  {
+   "sample_id": "43477",
+   "index": 1662,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 770
+  },
+  {
+   "sample_id": "51697",
+   "index": 1684,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 792
+  },
+  {
+   "sample_id": "59929",
+   "index": 1719,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 827
+  },
+  {
+   "sample_id": "59984",
+   "index": 1767,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 875
+  },
+  {
+   "sample_id": "59989",
+   "index": 1769,
+   "file": "DocVQA/validation-00001-of-00006.parquet",
+   "row": 877
+  },
+  {
+   "sample_id": "43727",
+   "index": 1854,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 70
+  },
+  {
+   "sample_id": "19175",
+   "index": 1870,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 86
+  },
+  {
+   "sample_id": "38869",
+   "index": 1924,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 140
+  },
+  {
+   "sample_id": "52153",
+   "index": 1930,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 146
+  },
+  {
+   "sample_id": "60385",
+   "index": 1959,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 175
+  },
+  {
+   "sample_id": "60389",
+   "index": 1963,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 179
+  },
+  {
+   "sample_id": "3066",
+   "index": 1975,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 191
+  },
+  {
+   "sample_id": "52222",
+   "index": 1979,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 195
+  },
+  {
+   "sample_id": "52238",
+   "index": 1995,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 211
+  },
+  {
+   "sample_id": "60472",
+   "index": 2027,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 243
+  },
+  {
+   "sample_id": "60484",
+   "index": 2039,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 255
+  },
+  {
+   "sample_id": "60496",
+   "index": 2051,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 267
+  },
+  {
+   "sample_id": "60497",
+   "index": 2052,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 268
+  },
+  {
+   "sample_id": "52366",
+   "index": 2092,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 308
+  },
+  {
+   "sample_id": "60597",
+   "index": 2104,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 320
+  },
+  {
+   "sample_id": "52484",
+   "index": 2132,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 348
+  },
+  {
+   "sample_id": "60747",
+   "index": 2164,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 380
+  },
+  {
+   "sample_id": "60750",
+   "index": 2169,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 385
+  },
+  {
+   "sample_id": "60808",
+   "index": 2193,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 409
+  },
+  {
+   "sample_id": "28057",
+   "index": 2205,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 421
+  },
+  {
+   "sample_id": "28058",
+   "index": 2208,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 424
+  },
+  {
+   "sample_id": "60881",
+   "index": 2233,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 449
+  },
+  {
+   "sample_id": "60932",
+   "index": 2254,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 470
+  },
+  {
+   "sample_id": "61124",
+   "index": 2331,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 547
+  },
+  {
+   "sample_id": "3841",
+   "index": 2370,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 586
+  },
+  {
+   "sample_id": "61230",
+   "index": 2397,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 613
+  },
+  {
+   "sample_id": "61290",
+   "index": 2442,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 658
+  },
+  {
+   "sample_id": "61388",
+   "index": 2495,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 711
+  },
+  {
+   "sample_id": "36831",
+   "index": 2511,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 727
+  },
+  {
+   "sample_id": "45085",
+   "index": 2537,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 753
+  },
+  {
+   "sample_id": "45154",
+   "index": 2599,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 815
+  },
+  {
+   "sample_id": "61613",
+   "index": 2633,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 849
+  },
+  {
+   "sample_id": "53433",
+   "index": 2641,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 857
+  },
+  {
+   "sample_id": "53434",
+   "index": 2642,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 858
+  },
+  {
+   "sample_id": "64971",
+   "index": 2648,
+   "file": "DocVQA/validation-00002-of-00006.parquet",
+   "row": 864
+  },
+  {
+   "sample_id": "4370",
+   "index": 2698,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 22
+  },
+  {
+   "sample_id": "53582",
+   "index": 2731,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 55
+  },
+  {
+   "sample_id": "4440",
+   "index": 2741,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 65
+  },
+  {
+   "sample_id": "4461",
+   "index": 2762,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 86
+  },
+  {
+   "sample_id": "37243",
+   "index": 2777,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 101
+  },
+  {
+   "sample_id": "37332",
+   "index": 2807,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 131
+  },
+  {
+   "sample_id": "37333",
+   "index": 2808,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 132
+  },
+  {
+   "sample_id": "37340",
+   "index": 2813,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 137
+  },
+  {
+   "sample_id": "45643",
+   "index": 2869,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 193
+  },
+  {
+   "sample_id": "48155",
+   "index": 2893,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 217
+  },
+  {
+   "sample_id": "53992",
+   "index": 2989,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 313
+  },
+  {
+   "sample_id": "45824",
+   "index": 3004,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 328
+  },
+  {
+   "sample_id": "45842",
+   "index": 3017,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 341
+  },
+  {
+   "sample_id": "37659",
+   "index": 3019,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 343
+  },
+  {
+   "sample_id": "4952",
+   "index": 3062,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 386
+  },
+  {
+   "sample_id": "62351",
+   "index": 3111,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 435
+  },
+  {
+   "sample_id": "62392",
+   "index": 3132,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 456
+  },
+  {
+   "sample_id": "62526",
+   "index": 3199,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 523
+  },
+  {
+   "sample_id": "62527",
+   "index": 3203,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 527
+  },
+  {
+   "sample_id": "5293",
+   "index": 3266,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 590
+  },
+  {
+   "sample_id": "5300",
+   "index": 3268,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 592
+  },
+  {
+   "sample_id": "5314",
+   "index": 3280,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 604
+  },
+  {
+   "sample_id": "46283",
+   "index": 3287,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 611
+  },
+  {
+   "sample_id": "21699",
+   "index": 3288,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 612
+  },
+  {
+   "sample_id": "46366",
+   "index": 3328,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 652
+  },
+  {
+   "sample_id": "46396",
+   "index": 3350,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 674
+  },
+  {
+   "sample_id": "46414",
+   "index": 3363,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 687
+  },
+  {
+   "sample_id": "46416",
+   "index": 3365,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 689
+  },
+  {
+   "sample_id": "5477",
+   "index": 3388,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 712
+  },
+  {
+   "sample_id": "5594",
+   "index": 3469,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 793
+  },
+  {
+   "sample_id": "5600",
+   "index": 3483,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 807
+  },
+  {
+   "sample_id": "63001",
+   "index": 3518,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 842
+  },
+  {
+   "sample_id": "5667",
+   "index": 3529,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 853
+  },
+  {
+   "sample_id": "63033",
+   "index": 3548,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 872
+  },
+  {
+   "sample_id": "54860",
+   "index": 3563,
+   "file": "DocVQA/validation-00003-of-00006.parquet",
+   "row": 887
+  },
+  {
+   "sample_id": "63050",
+   "index": 3569,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 2
+  },
+  {
+   "sample_id": "46719",
+   "index": 3587,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 20
+  },
+  {
+   "sample_id": "63199",
+   "index": 3669,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 102
+  },
+  {
+   "sample_id": "22306",
+   "index": 3714,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 147
+  },
+  {
+   "sample_id": "55106",
+   "index": 3745,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 178
+  },
+  {
+   "sample_id": "55112",
+   "index": 3755,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 188
+  },
+  {
+   "sample_id": "5964",
+   "index": 3764,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 197
+  },
+  {
+   "sample_id": "55126",
+   "index": 3765,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 198
+  },
+  {
+   "sample_id": "63312",
+   "index": 3767,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 200
+  },
+  {
+   "sample_id": "1191",
+   "index": 3778,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 211
+  },
+  {
+   "sample_id": "63346",
+   "index": 3785,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 218
+  },
+  {
+   "sample_id": "47087",
+   "index": 3884,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 317
+  },
+  {
+   "sample_id": "38920",
+   "index": 3908,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 341
+  },
+  {
+   "sample_id": "30802",
+   "index": 3960,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 393
+  },
+  {
+   "sample_id": "63589",
+   "index": 3973,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 406
+  },
+  {
+   "sample_id": "64744",
+   "index": 3984,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 417
+  },
+  {
+   "sample_id": "55416",
+   "index": 3987,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 420
+  },
+  {
+   "sample_id": "55453",
+   "index": 4006,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 439
+  },
+  {
+   "sample_id": "63667",
+   "index": 4024,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 457
+  },
+  {
+   "sample_id": "6351",
+   "index": 4040,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 473
+  },
+  {
+   "sample_id": "63699",
+   "index": 4043,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 476
+  },
+  {
+   "sample_id": "63841",
+   "index": 4133,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 566
+  },
+  {
+   "sample_id": "63866",
+   "index": 4159,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 592
+  },
+  {
+   "sample_id": "25726",
+   "index": 4178,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 611
+  },
+  {
+   "sample_id": "47532",
+   "index": 4189,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 622
+  },
+  {
+   "sample_id": "47535",
+   "index": 4192,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 625
+  },
+  {
+   "sample_id": "47539",
+   "index": 4195,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 628
+  },
+  {
+   "sample_id": "6622",
+   "index": 4218,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 651
+  },
+  {
+   "sample_id": "56039",
+   "index": 4370,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 803
+  },
+  {
+   "sample_id": "56050",
+   "index": 4378,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 811
+  },
+  {
+   "sample_id": "15094",
+   "index": 4380,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 813
+  },
+  {
+   "sample_id": "56062",
+   "index": 4385,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 818
+  },
+  {
+   "sample_id": "56077",
+   "index": 4398,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 831
+  },
+  {
+   "sample_id": "64275",
+   "index": 4411,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 844
+  },
+  {
+   "sample_id": "56097",
+   "index": 4418,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 851
+  },
+  {
+   "sample_id": "47919",
+   "index": 4433,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 866
+  },
+  {
+   "sample_id": "64305",
+   "index": 4437,
+   "file": "DocVQA/validation-00004-of-00006.parquet",
+   "row": 870
+  },
+  {
+   "sample_id": "6998",
+   "index": 4473,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 15
+  },
+  {
+   "sample_id": "64420",
+   "index": 4525,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 67
+  },
+  {
+   "sample_id": "56291",
+   "index": 4563,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 105
+  },
+  {
+   "sample_id": "64546",
+   "index": 4605,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 147
+  },
+  {
+   "sample_id": "64550",
+   "index": 4609,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 151
+  },
+  {
+   "sample_id": "56399",
+   "index": 4647,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 189
+  },
+  {
+   "sample_id": "64612",
+   "index": 4665,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 207
+  },
+  {
+   "sample_id": "56459",
+   "index": 4703,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 245
+  },
+  {
+   "sample_id": "56468",
+   "index": 4710,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 252
+  },
+  {
+   "sample_id": "56469",
+   "index": 4711,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 253
+  },
+  {
+   "sample_id": "64701",
+   "index": 4744,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 286
+  },
+  {
+   "sample_id": "50311",
+   "index": 4758,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 300
+  },
+  {
+   "sample_id": "56530",
+   "index": 4762,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 304
+  },
+  {
+   "sample_id": "56641",
+   "index": 4833,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 375
+  },
+  {
+   "sample_id": "32149",
+   "index": 4882,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 424
+  },
+  {
+   "sample_id": "64942",
+   "index": 4907,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 449
+  },
+  {
+   "sample_id": "56778",
+   "index": 4921,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 463
+  },
+  {
+   "sample_id": "56806",
+   "index": 4944,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 486
+  },
+  {
+   "sample_id": "56810",
+   "index": 4948,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 490
+  },
+  {
+   "sample_id": "56825",
+   "index": 4963,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 505
+  },
+  {
+   "sample_id": "56851",
+   "index": 4979,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 521
+  },
+  {
+   "sample_id": "56861",
+   "index": 4991,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 533
+  },
+  {
+   "sample_id": "24116",
+   "index": 5012,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 554
+  },
+  {
+   "sample_id": "32352",
+   "index": 5036,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 578
+  },
+  {
+   "sample_id": "65149",
+   "index": 5056,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 598
+  },
+  {
+   "sample_id": "57028",
+   "index": 5105,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 647
+  },
+  {
+   "sample_id": "65237",
+   "index": 5112,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 654
+  },
+  {
+   "sample_id": "57138",
+   "index": 5161,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 703
+  },
+  {
+   "sample_id": "65332",
+   "index": 5171,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 713
+  },
+  {
+   "sample_id": "57167",
+   "index": 5188,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 730
+  },
+  {
+   "sample_id": "40788",
+   "index": 5198,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 740
+  },
+  {
+   "sample_id": "65406",
+   "index": 5238,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 780
+  },
+  {
+   "sample_id": "65419",
+   "index": 5254,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 796
+  },
+  {
+   "sample_id": "65420",
+   "index": 5255,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 797
+  },
+  {
+   "sample_id": "24495",
+   "index": 5278,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 820
+  },
+  {
+   "sample_id": "57287",
+   "index": 5301,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 843
+  },
+  {
+   "sample_id": "49127",
+   "index": 5333,
+   "file": "DocVQA/validation-00005-of-00006.parquet",
+   "row": 875
+  }
+ ]
+}

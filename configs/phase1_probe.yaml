@@ -1,0 +1,20 @@
+# Phase 1: which memory holds the image? One-sided ablations, all tokens, scope=image.
+phase: phase1_probe
+models: [Qwen/Qwen3.5-4B]
+tasks: [docvqa, chartqa, textvqa, pope]
+max_pixels: 1310720
+conditions:
+  - {kv: full, state: full}
+  - {kv: "4", state: full}
+  - {kv: noise, state: full}
+  - {kv: zero, state: full}
+  - {kv: full, state: "8"}
+  - {kv: full, state: 8ef}
+  - {kv: full, state: "6"}
+  - {kv: full, state: 6ef}
+  - {kv: full, state: noise}
+  - {kv: full, state: zero}
+  - {kv: zero, state: zero}
+stop_rule: >-
+  Stop and report if on any task NLL_blind - NLL_full <= 0 for full/full (retained undefined), or if
+  kv zero and state zero both keep retained > 0.95 on all tasks (no measurable effect; check hooks first).

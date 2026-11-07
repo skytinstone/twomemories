@@ -1,0 +1,16 @@
+# Phase 3: visual token deletion x KV bits (iso-budget, Table 5). State stays full.
+phase: phase3_tokens
+models: [Qwen/Qwen3.5-4B]
+tasks: [docvqa, chartqa, textvqa, pope]
+max_pixels: 1310720
+conditions:
+  - {kv: full, state: full}
+  - {kv: "4", state: full}
+  - {kv: full, state: full, token_keep: 0.5, token_method: uniform}
+  - {kv: "4", state: full, token_keep: 0.5, token_method: uniform}
+  - {kv: full, state: full, token_keep: 0.25, token_method: uniform}
+  - {kv: "4", state: full, token_keep: 0.25, token_method: uniform}
+  - {kv: full, state: full, token_keep: 0.5, token_method: random}
+stop_rule: >-
+  Stop if uniform and random at 50% differ by more than the CI width on 3+ tasks (method choice dominates;
+  report before spending more).

@@ -1,0 +1,20 @@
+# Phase 2: bit-width grid on the two memories, scope=image, plus the first-paper whole-cache setting.
+phase: phase2_bits
+models: [Qwen/Qwen3.5-4B]
+tasks: [docvqa, chartqa, textvqa, pope]
+max_pixels: 1310720
+conditions:
+  - {kv: full, state: full}
+  - {kv: full, state: "8"}
+  - {kv: full, state: 8ef}
+  - {kv: full, state: "6"}
+  - {kv: full, state: 6ef}
+  - {kv: "4", state: full}
+  - {kv: "4", state: "8"}
+  - {kv: "4", state: 8ef}
+  - {kv: "4", state: "6"}
+  - {kv: "4", state: 6ef}
+  - {kv: "4", state: "8", scope: whole}
+  - {kv: "4", state: 8ef, scope: whole}
+stop_rule: >-
+  Stop after this phase if phase 1 showed no state effect (state zero retained CI contains 1 on all tasks).

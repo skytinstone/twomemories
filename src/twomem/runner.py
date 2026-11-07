@@ -158,6 +158,8 @@ def _run(model, processor, model_id, task, cond, n_limit, out_dir, max_pixels, e
     tcfg = text_config(model)
     run_cond = cond or quant.Condition()
     n_new, t_cell = 0, 0.0
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()   # peak VRAM is per cell
     from hybridquant import run_metadata
 
     hq_meta = run_metadata()

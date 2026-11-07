@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "twomem"
+version = "0.1.0"
+description = "The Image Lives in Two Memories: visual information in hybrid linear-attention VLMs (experiment code)"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = ["hybridquant", "torch>=2.6", "transformers>=5.0", "accelerate", "datasets", "huggingface_hub",
+                "pyarrow", "pillow", "numpy", "pyyaml", "tqdm"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools]
+packages = ["twomem", "analysis"]
+package-dir = {"twomem" = "src/twomem", "analysis" = "analysis"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

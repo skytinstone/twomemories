@@ -71,3 +71,16 @@ L2-local(0.8B, MPS, DocVQA 5샘플, full): 같은 샘플을 batch 2로 복제했
 
 ### D-21. 본 실험은 백그라운드 실행 + 모니터 셀 — 확정
 셀 6이 `!bash scripts/run_all.sh`를 포그라운드로 돌리면 몇 시간 동안 커널이 막혀 진행을 볼 수 없다. 셀 6은 `subprocess.Popen(start_new_session=True)`로 띄우고 바로 끝나며, 셀 7이 60초마다 `scripts/status.py`를 호출한다. status는 결과 파일만 읽는다(셀별 jsonl 줄 수를 cell_hash로 세고, 유닛은 cap과 같은 compute_log의 phase 태그 합). 시작 전 phase의 남은 시간은 같은 모델의 이전 셀 평균(`--dry-run`과 같은 추정). 로그는 `MyDrive/twomemories/logs/`에 둔다. `results/` 안에 두면 run_all이 커밋하므로 push 오류 메시지 같은 것이 레포에 들어갈 수 있다. 셀 8은 프로세스 그룹에 SIGTERM을 보낸다. 끊긴 셀의 유닛은 compute_log에 남지 않는다(셀 끝에 기록). Colab이 실행 중인 셀이 없을 때 런타임을 끊는지는 UNVERIFIED라 셀 7을 켜 두도록 안내한다. status.py는 다음 태그(D-12 확정 후 본 실험 태그)부터 체크아웃에 들어간다.
+
+### D-22. 세션 단절 후 이어하기 — 확정
+- 결과 줄 읽기는 잘린 줄을 건너뛰고(`runner.read_jsonl`), 쓰기는 파일이 잘린 줄로 끝나면 새 줄에서 시작한다(`runner.append_jsonl`). 분석(`Index`)은 같은 (셀, 샘플)이 두 번 있으면 처음 것만 쓴다.
+- compute_log의 phase 태그를 runner가 줄을 쓸 때 함께 넣는다. 이전에는 `run_phase._tag_phase`가 compute_log 전체를 다시 썼는데, 그 도중 끊기면 로그(=상한 계산 근거)를 잃을 수 있었다.
+- `run_phase`는 남은 셀이 없는 모델·phase에서 모델을 로드하지 않는다(새 세션에서 끝난 phase를 빠르게 지나감).
+- `run_all.sh`는 체크아웃을 태그에 둔 채, `.results_wt` worktree를 원격 `results/<tag>` 브랜치 끝(없으면 태그)에서 만들고 Drive 결과를 rsync해 커밋·push한다. 새 세션의 새 clone에서도 push가 fast-forward다. 결과 줄의 commit은 계속 태그 커밋이다. 로컬 bare 원격으로 두 세션(새 clone 두 번)을 흉내 내어 확인했다.
+- 끊긴 셀에서 이미 쓴 샘플의 유닛은 compute_log에 남지 않는다(셀 끝에 기록). 상한 계산이 최대 한 셀만큼 덜 잡힌다. 4B 셀 하나 200샘플 × 약 2초 = 약 7분, 약 1유닛.
+
+### D-23. 모니터 3초 갱신, 커널 안에서 증분 읽기 — 확정 (번복: D-21의 "60초마다 status.py 호출")
+사용자 요청으로 3초 갱신. 매번 subprocess로 python을 띄우면 torch import만 수 초라, 셀 7이 `status.Monitor`를 커널에 한 번 import하고 각 jsonl의 늘어난 바이트만 읽는다(로컬 측정 렌더 3 ms). 표시: 전체·phase별 % (phase 사이에 공유되는 셀은 전체 %에서 한 번만 센다), 현재 단계, 완료 예정 시각(KST). 속도는 같은 모델의 최근 15분 결과 줄의 벽시계 간격(모델 로드·다운로드 포함). 그 모델 줄이 아직 없으면(예: phase 4의 9B) compute_log / `sec_per_sample_guess`로 추정하고 "prior"로 표시한다.
+
+### D-24. phase마다 표·그림 생성, 논문은 맥에서 — 확정
+`run_all.sh`가 phase마다 결과 브랜치 worktree에서 `make_tables`, `figures`(pdf + png), `report`를 모델별로 돌려 `paper/`에 넣고 함께 push한다(CPU, 수 초). 논문용 최종 표·그림은 맥에서 병합 후 다시 만든다(hybridquant와 같은 `paper/figures`, `paper/tables` 구조).

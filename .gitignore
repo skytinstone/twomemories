@@ -9,3 +9,4 @@ hf_cache/
 data_cache/
 .DS_Store
 .ipynb_checkpoints/
+.results_wt/

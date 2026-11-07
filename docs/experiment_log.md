@@ -24,3 +24,7 @@
 | 셀 5 요약 | dry-run 루프 `{ph}` 미확장(D-20). 사용 유닛 약 3.2(설치·다운로드 포함) |
 
 수정 후 `v0.1.1-preflight`로 재실행. blind DocVQA 5줄은 cell_hash가 같아 resume으로 건너뛴다(그 줄의 commit은 188a6dd).
+
+## 2026-11-07 맥 작업 사고 기록
+
+run_all.sh 이어하기 시뮬레이션 중 임시 clone이 실패한 채 명령이 이어져, 실제 레포에서 테스트용 sed와 run_all이 실행됐다. 가짜 결과 6줄(`results/m/...`)이 원격 브랜치 `results/0432a52`로 push됐다. 확인 후 브랜치를 삭제하고 run_all.sh를 되돌렸다. main과 태그는 영향 없음. 이후 시뮬레이션은 `set -e` 서브셸, 로컬 bare 원격, `GH_TOKEN` 제거로 다시 했다.

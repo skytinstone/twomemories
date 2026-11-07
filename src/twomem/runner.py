@@ -24,7 +24,8 @@ from . import budget, data, metrics, quant, tokens
 from .model import Session, encode, encode_blind, image_token_id, load, prepare, text_config
 
 __all__ = ["MAX_NEW_TOKENS", "REPO", "RESULTS", "COMPUTE_LOG", "git_commit", "gpu_name", "units_per_hour",
-           "subset_id_of", "cell_hash", "cell_path", "run_cell", "run_blind", "eval_sample"]
+           "subset_id_of", "cell_hash", "cell_path", "read_jsonl", "append_jsonl", "cell_done", "run_cell",
+           "run_blind", "eval_sample"]
 
 MAX_NEW_TOKENS = 16
 REPO = Path(__file__).resolve().parents[2]
@@ -77,16 +78,41 @@ def cell_path(out_dir: Path, model_id: str, task: str, cond: quant.Condition | N
     return Path(out_dir) / model_id.replace("/", "__") / task / f"{name}.jsonl"
 
 
-def _done(path: Path, h: str) -> set[str]:
+def read_jsonl(path: Path) -> list[dict]:
+    """All parseable lines of a jsonl file. A line cut off by a killed session is skipped, not fatal."""
+    path = Path(path)
     if not path.exists():
-        return set()
-    out = set()
-    for line in path.read_text().splitlines():
+        return []
+    rows = []
+    for line in path.read_text(errors="replace").splitlines():
         if line.strip():
-            r = json.loads(line)
-            if r.get("cell_hash") == h:
-                out.add(r["sample_id"])
-    return out
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return rows
+
+
+def append_jsonl(path: Path, obj: dict) -> None:
+    """Append one line; starts on a fresh line if the file ends in a partial line from a killed session."""
+    path = Path(path)
+    lead = ""
+    if path.exists() and path.stat().st_size:
+        with path.open("rb") as f:
+            f.seek(-1, 2)
+            lead = "" if f.read(1) == b"\n" else "\n"
+    with path.open("a") as f:
+        f.write(lead + json.dumps(obj) + "\n")
+
+
+def _done(path: Path, h: str) -> set[str]:
+    return {r["sample_id"] for r in read_jsonl(path) if r.get("cell_hash") == h and "sample_id" in r}
+
+
+def cell_done(out_dir: Path, model_id: str, task: str, cond: quant.Condition | None, max_pixels: int | None) -> int:
+    """Number of finished samples of one cell (no model needed)."""
+    h = cell_hash(model_id, task, cond, subset_id_of(task), max_pixels)
+    return len(_done(cell_path(out_dir, model_id, task, cond), h))
 
 
 def _eos_ids(model, processor) -> set[int]:
@@ -148,7 +174,7 @@ def eval_sample(model, processor, task: str, sample: dict, cond: quant.Condition
 
 
 def _run(model, processor, model_id, task, cond, n_limit, out_dir, max_pixels, extra_meta=None,
-         compute_log: Path | None = None) -> dict:
+         compute_log: Path | None = None, phase: str | None = None) -> dict:
     sub_id = subset_id_of(task)
     h = cell_hash(model_id, task, cond, sub_id, max_pixels)
     path = cell_path(out_dir, model_id, task, cond)
@@ -186,9 +212,7 @@ def _run(model, processor, model_id, task, cond, n_limit, out_dir, max_pixels, e
                      "peak_vram_gb": (torch.cuda.max_memory_allocated() / 2**30) if torch.cuda.is_available() else None,
                      **sample["meta"], **(extra_meta or {})},
         }
-        validate(row)
-        with path.open("a") as f:
-            f.write(json.dumps(row) + "\n")
+        append_jsonl(path, validate(row))
         n_new += 1
         t_cell += sec
     if n_new:
@@ -197,15 +221,15 @@ def _run(model, processor, model_id, task, cond, n_limit, out_dir, max_pixels, e
                                 "n_samples": n_new, "commit": commit,
                                 "peak_vram_gb": (torch.cuda.max_memory_allocated() / 2**30)
                                 if torch.cuda.is_available() else None})
-        log = compute_log or COMPUTE_LOG
-        with Path(log).open("a") as f:
-            f.write(json.dumps(rec) + "\n")
+        if phase:
+            rec["phase"] = phase
+        append_jsonl(compute_log or COMPUTE_LOG, rec)
     return {"cell_hash": h, "path": str(path), "n_new": n_new, "seconds": t_cell, "n_skipped": len(done)}
 
 
 def run_cell(model_id: str, task: str, cond: quant.Condition, subset_id: str | None = None, n_limit: int | None = None,
              out_dir: Path = RESULTS, *, model=None, processor=None, max_pixels: int | None = None, batch: int = 1,
-             compute_log: Path | None = None) -> dict:
+             compute_log: Path | None = None, phase: str | None = None) -> dict:
     """Run one cell (resumable). ``subset_id``, if given, must match the committed subset file."""
     if batch != 1:
         raise NotImplementedError("batch > 1 is disabled (docs/decision_log.md, D-batch)")
@@ -213,11 +237,14 @@ def run_cell(model_id: str, task: str, cond: quant.Condition, subset_id: str | N
         raise ValueError(f"subset_id {subset_id} does not match configs/subsets/{task}.json")
     if model is None:
         model, processor = load(model_id, max_pixels=max_pixels)
-    return _run(model, processor, model_id, task, cond, n_limit, out_dir, max_pixels, compute_log=compute_log)
+    return _run(model, processor, model_id, task, cond, n_limit, out_dir, max_pixels, compute_log=compute_log,
+                phase=phase)
 
 
 def run_blind(model_id: str, task: str, n_limit: int | None = None, out_dir: Path = RESULTS, *, model=None,
-              processor=None, max_pixels: int | None = None, compute_log: Path | None = None) -> dict:
+              processor=None, max_pixels: int | None = None, compute_log: Path | None = None,
+              phase: str | None = None) -> dict:
     if model is None:
         model, processor = load(model_id, max_pixels=max_pixels)
-    return _run(model, processor, model_id, task, None, n_limit, out_dir, max_pixels, compute_log=compute_log)
+    return _run(model, processor, model_id, task, None, n_limit, out_dir, max_pixels, compute_log=compute_log,
+                phase=phase)

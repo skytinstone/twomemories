@@ -7,14 +7,13 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
 import yaml
 
 from twomem.quant import Condition
-from twomem.runner import COMPUTE_LOG, REPO, RESULTS, gpu_name, run_blind, run_cell
+from twomem.runner import COMPUTE_LOG, REPO, RESULTS, cell_done, gpu_name, read_jsonl, run_blind, run_cell
 
 CONFIGS = REPO / "configs"
 
@@ -40,9 +39,7 @@ def load_conditions(phase: str, cond_set: str | None = None) -> tuple[dict, list
 
 
 def _compute_rows(path: Path = COMPUTE_LOG) -> list[dict]:
-    if not path.exists():
-        return []
-    return [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+    return read_jsonl(path)
 
 
 def sec_per_sample(model_id: str, gpu: str, log: Path = COMPUTE_LOG) -> float:
@@ -93,38 +90,27 @@ def main(argv=None):
 
     from twomem.model import load
 
+    out, mp = Path(args.out), cfg.get("max_pixels")
     for model_id in models:
-        model, processor = load(model_id, max_pixels=cfg.get("max_pixels"))
-        for task in tasks:
-            cells = [None] + conds
-            for cond in cells:
-                if phase_units(args.phase, comp_log) >= cap:
-                    print(f"STOP: phase {args.phase} reached its cap of {cap} units")
-                    return 2
-                kw = dict(model=model, processor=processor, max_pixels=cfg.get("max_pixels"), compute_log=comp_log)
-                if cond is None:
-                    res = run_blind(model_id, task, args.limit, Path(args.out), **kw)
-                else:
-                    res = run_cell(model_id, task, cond, None, args.limit, Path(args.out), **kw)
-                _tag_phase(comp_log, res["cell_hash"], args.phase, res["n_new"])
-                print(f"{model_id} {task} {'blind' if cond is None else cond.label()}: new={res['n_new']} "
-                      f"skipped={res['n_skipped']} sec={res['seconds']:.1f}", flush=True)
+        # cells still missing samples; a phase finished in an earlier session is skipped without loading the model
+        todo = [(t, c) for t in tasks for c in [None] + conds if cell_done(out, model_id, t, c, mp) < n_samples[t]]
+        print(f"{model_id}: {len(todo)} of {len(tasks) * (len(conds) + 1)} cells left", flush=True)
+        if not todo:
+            continue
+        model, processor = load(model_id, max_pixels=mp)
+        for task, cond in todo:
+            if phase_units(args.phase, comp_log) >= cap:
+                print(f"STOP: phase {args.phase} reached its cap of {cap} units")
+                return 2
+            kw = dict(model=model, processor=processor, max_pixels=mp, compute_log=comp_log, phase=args.phase)
+            if cond is None:
+                res = run_blind(model_id, task, args.limit, out, **kw)
+            else:
+                res = run_cell(model_id, task, cond, None, args.limit, out, **kw)
+            print(f"{model_id} {task} {'blind' if cond is None else cond.label()}: new={res['n_new']} "
+                  f"skipped={res['n_skipped']} sec={res['seconds']:.1f}", flush=True)
         del model
     return 0
-
-
-def _tag_phase(log: Path, h: str, phase: str, n_new: int) -> None:
-    """Add the phase name to the compute-log line the runner just appended for this cell."""
-    if not n_new or not log.exists():
-        return
-    lines = log.read_text().splitlines()
-    for i in range(len(lines) - 1, -1, -1):
-        r = json.loads(lines[i])
-        if r["cell_hash"] == h and "phase" not in r:
-            r["phase"] = phase
-            lines[i] = json.dumps(r)
-            break
-    log.write_text("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":

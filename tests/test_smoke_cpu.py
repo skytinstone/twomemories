@@ -7,6 +7,7 @@ weights are random and tiny.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -237,3 +238,26 @@ def test_retained_known_value():
     assert metrics.retained(2.0, 1.0, 1.5) == pytest.approx(0.5)
     ci = metrics.paired_bootstrap([2.0, 2.0], [1.0, 1.0], [1.5, 1.5], n=100)
     assert ci["retained"] == pytest.approx(0.5) and ci["lo"] == pytest.approx(0.5)
+
+
+def test_resume_after_killed_write(tmp_path):
+    """A session killed mid-write leaves a partial line: reads skip it, the next append starts a fresh line,
+    and the monitor's incremental reader only returns complete lines."""
+    import sys
+
+    from twomem.runner import append_jsonl, read_jsonl
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+    from status import _Tail
+
+    p = tmp_path / "cell.jsonl"
+    append_jsonl(p, {"sample_id": "a"})
+    tail = _Tail(p)
+    assert [r["sample_id"] for r in tail.new_rows()] == ["a"]
+    with p.open("a") as f:
+        f.write('{"sample_id": "b", "gold')        # killed here
+    assert [r["sample_id"] for r in read_jsonl(p)] == ["a"]
+    assert tail.new_rows() == []
+    append_jsonl(p, {"sample_id": "c"})
+    assert [r["sample_id"] for r in read_jsonl(p)] == ["a", "c"]
+    assert [r["sample_id"] for r in tail.new_rows()] == ["c"]

@@ -11,7 +11,6 @@ checks and are excluded unless --allow-local (then the header says so).
 from __future__ import annotations
 
 import argparse
-import json
 from collections import defaultdict
 from pathlib import Path
 
@@ -19,6 +18,7 @@ import numpy as np
 
 from twomem.metrics import paired_bootstrap
 from twomem.quant import Condition
+from twomem.runner import read_jsonl
 
 REPO = Path(__file__).resolve().parents[1]
 TASKS = ("docvqa", "chartqa", "textvqa", "pope")
@@ -42,11 +42,9 @@ def load_rows(results: Path, allow_local: bool) -> list[dict]:
     for p in sorted(results.rglob("*.jsonl")):
         if p.name == "compute_log.jsonl":
             continue
-        for line in p.read_text().splitlines():
-            if line.strip():
-                r = json.loads(line)
-                if allow_local or r.get("gpu") not in LOCAL_GPUS:
-                    rows.append(r)
+        for r in read_jsonl(p):
+            if allow_local or r.get("gpu") not in LOCAL_GPUS:
+                rows.append(r)
     return rows
 
 
@@ -59,6 +57,8 @@ class Index:
         self.score = defaultdict(list)
         for r in rows:
             key = (r["model_id"], r["task"], "blind" if r.get("blind") else Condition.from_dict(r["cond"]))
+            if r["sample_id"] in self.nll[key]:   # a sample written twice across sessions counts once
+                continue
             self.nll[key][r["sample_id"]] = r["gold_nll"] / max(1, r["gold_ntok"])
             self.mb[key].append(r["total_mb"])
             self.score[key].append(r["score"])

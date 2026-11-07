@@ -1,6 +1,6 @@
 """Figure: retained ratio per condition and task with 95% CI (results/*.jsonl only).
 
-  python analysis/figures.py --model Qwen/Qwen3.5-4B --out paper/figures/retained.pdf
+  python analysis/figures.py --model Qwen/Qwen3.5-4B --out paper/figures/retained.pdf   # also writes the .png
 Needs matplotlib (pip install matplotlib); not a runtime dependency of twomem.
 """
 from __future__ import annotations
@@ -20,10 +20,14 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="Qwen/Qwen3.5-4B")
     ap.add_argument("--out", default=str(REPO / "paper" / "figures" / "retained.pdf"))
+    ap.add_argument("--results", default=str(REPO / "results"))
     ap.add_argument("--allow-local", action="store_true")
     args = ap.parse_args(argv)
 
-    idx = Index(load_rows(REPO / "results", args.allow_local))
+    idx = Index(load_rows(Path(args.results), args.allow_local))
+    if not any(idx.retained(args.model, t, c) for t in TASKS for c in TABLE2_ROWS):
+        print(f"no retained values for {args.model} yet; no figure")
+        return
     fig, axes = plt.subplots(1, len(TASKS), figsize=(4 * len(TASKS), 5), sharey=True)
     for ax, t in zip(axes, TASKS):
         ys, labels = [], []
@@ -45,6 +49,7 @@ def main(argv=None):
     fig.tight_layout()
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.out)
+    fig.savefig(Path(args.out).with_suffix(".png"), dpi=200)
     print(args.out)
 
 

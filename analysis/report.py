@@ -5,15 +5,15 @@
 from __future__ import annotations
 
 import argparse
-import json
 from collections import defaultdict
 from pathlib import Path
 
 from analysis.make_tables import REPO, Index, load_rows, table2, table5
+from twomem.runner import read_jsonl
 
 
 def compute_summary(log: Path, phase: str | None) -> dict:
-    rows = [json.loads(l) for l in log.read_text().splitlines() if l.strip()] if log.exists() else []
+    rows = read_jsonl(log)
     if phase:
         rows = [r for r in rows if r.get("phase") == phase]
     by_gpu = defaultdict(lambda: {"cells": 0, "samples": 0, "seconds": 0.0, "units": 0.0, "vram": 0.0})
@@ -27,9 +27,9 @@ def compute_summary(log: Path, phase: str | None) -> dict:
     return dict(by_gpu)
 
 
-def render(phase: str | None, model: str, allow_local: bool) -> str:
-    idx = Index(load_rows(REPO / "results", allow_local))
-    comp = compute_summary(REPO / "results" / "compute_log.jsonl", phase)
+def render(phase: str | None, model: str, allow_local: bool, results: Path = REPO / "results") -> str:
+    idx = Index(load_rows(results, allow_local))
+    comp = compute_summary(results / "compute_log.jsonl", phase)
     out = [f"# 단계 보고 / Phase report: {phase or 'all'} ({model})", ""]
     if allow_local:
         out += ["> 로컬 검증 수치 포함, 논문 미사용. / Includes local check numbers; not for the paper.", ""]
@@ -52,9 +52,10 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--phase", default=None)
     ap.add_argument("--model", default="Qwen/Qwen3.5-4B")
+    ap.add_argument("--results", default=str(REPO / "results"))
     ap.add_argument("--allow-local", action="store_true")
     args = ap.parse_args(argv)
-    print(render(args.phase, args.model, args.allow_local))
+    print(render(args.phase, args.model, args.allow_local, Path(args.results)))
 
 
 if __name__ == "__main__":

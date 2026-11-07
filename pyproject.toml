@@ -13,6 +13,7 @@ dependencies = ["hybridquant", "torch>=2.6", "transformers>=5.0", "accelerate", 
 
 [project.optional-dependencies]
 dev = ["pytest"]
+analysis = ["matplotlib"]
 
 [tool.setuptools]
 packages = ["twomem", "analysis"]

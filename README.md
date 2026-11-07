@@ -35,8 +35,16 @@ python scripts/run_phase.py --phase preflight --limit 5 --out results/local   # 
 2. Google Drive에 `MyDrive/twomemories/` 폴더가 없어도 된다(setup이 `results/`를 만든다). HF 캐시는 Drive가 아니라 Colab 로컬 디스크 `/content/hf_cache`에 두며 세션마다 다시 받는다(D-18).
 3. Colab에서 `notebooks/colab_runner.ipynb`를 연다(GitHub 탭, 비공개 레포 접근 허용). 런타임 GPU 선택.
 4. 셀 1–5 실행: Drive 마운트 → setup → `v0.1.1-preflight` 체크아웃 → 4B preflight(22조건 × 4태스크 × 5샘플) → 셀당 초, VRAM 피크, phase별 예상 유닛.
-5. 5번 결과를 보고 승인한 뒤에만 셀 6에서 `APPROVED = True`로 바꿔 실행한다. `run_all.sh`가 백그라운드로 돌고, phase마다 결과가 `results/<tag>` 브랜치로 push된다. 로그는 `MyDrive/twomemories/logs/run_all.log`.
-6. 셀 7(모니터)을 켜 둔다. 60초마다 `scripts/status.py`로 phase별 셀·샘플·유닛/상한·남은 시간, 최근 셀(마지막 줄 이후 경과 초), GPU, 로그 끝 줄을 보여준다. 셀 7을 멈춰도 실험은 계속된다. 셀 8은 실험 중지(재실행 시 resume).
+5. 5번 결과를 보고 승인한 뒤에만 셀 6에서 `APPROVED = True`로 바꿔 실행한다. `run_all.sh`가 백그라운드로 phase 1→4를 돌고, phase마다 결과와 표·그림(`paper/tables/<모델>/`, `paper/figures/retained_<모델>.{pdf,png}`, `paper/report_<모델>.md`)을 `results/<tag>` 브랜치로 push한다. 로그는 `MyDrive/twomemories/logs/run_all.log`.
+6. 셀 7(모니터)을 켜 둔다. 3초마다 전체·phase별 진행률(%), 현재 단계, 완료 예정 시각(KST), 유닛/상한, 최근 셀(마지막 줄 이후 경과 초), GPU, 로그 끝 줄을 보여준다. 셀 7을 멈춰도 실험은 계속된다. 셀 8은 실험 중지.
+
+### 세션이 끊겼을 때
+
+새 세션에서 셀 **1 → 2 → 3 → 6(APPROVED = True) → 7**. 결과는 샘플마다 Drive에 쓰이므로 끝난 셀·phase는 모델 로드 없이 건너뛰고, 끊긴 셀의 남은 샘플부터 이어 돈다. 결과 브랜치 push는 이전 세션이 push한 커밋 위에 이어 붙는다(fast-forward).
+
+### 끝난 뒤
+
+맥에서 `results/<tag>` 브랜치를 main에 병합하고, `analysis/`로 표·그림을 다시 만들어 논문(`paper/`)에 넣는다.
 
 Colab에서는 코드를 고치지 않는다. 수정은 맥에서 하고 새 태그를 push한 뒤 셀 3에서 다시 체크아웃한다.
 

@@ -38,6 +38,20 @@
 - Kwon et al., arXiv:2609.27470 (DeltaS): GDN state 변화로 KV eviction(Qwen3.5-9B 포함).
 - 첫 논문은 arXiv에 없음 → `@misc` 미발표 원고로 인용.
 
+## 2026-11-07 2차 수정 (코드 변경 없이 원고만)
+- Figure 1 개요 그림 추가: `paper/make_overview.py` → `paper/figures/overview.{pdf,png}`. 수치는 캐시 크기뿐.
+- 관련 연구: knockout 3편(Kaduri, Zhang, Neo)은 원문 초록으로 확인한 한 문장씩. Salazar et al.(2607.03358, 경로 대체·fallback), DTP(ICLR 2026, Mamba MLLM 가지치기), InfiniteVL(2512.08829, GDN 하이브리드 VLM) 추가.
+- 양자화 오차 상한 |Q_b(x)−x| ≤ σ/2 = 그룹 범위의 1/(2(2^b−1)): 4bit 3.3%, 6bit 0.79%, 8bit 0.20%.
+- retained를 샘플 가중 평균으로 분해(식 12). 두 번째 등호는 모든 샘플에서 B_i ≠ F_i일 때만 성립한다고 명시.
+- 개입별로 남는 정보 경로 표(Table 2). KV 0 + state 0 셀이 conv 누출과 attention 희석의 상한을 잰다.
+- 사전 예측 P1–P4(4.6절). 결과와 대조해 유지, 수정, 삭제할 것.
+- **phase 3의 같은 메모리 비교 짝 정정**: 이전 TBD의 "κ=0.5@16bit vs κ=1@4bit"는 8 vs 4 bit라 같지 않다. 맞는 짝은 κ=0.25@16bit vs κ=1@4bit(둘 다 4 bit). 텍스트 행은 16 vs 4 bit로 다르다.
+- 한계 (iv): 제거 실험은 평소 경로가 아니라 대체(fallback) 가능성을 잴 수 있다(Salazar et al.).
+- 부록 B 조건 표(22개, phase, 비트), 부록 C 컴퓨팅 표(preflight 행만 채움).
+
+## 코드 검토에서 찾은 문제 (지금은 고치지 않음, Colab 실행 중)
+- **whole-scope EF의 잔차 공유**: hybridquant의 EF 잔차는 `stats.ef_residuals` 하나이고, `Session.fork()`의 deepcopy는 캐시만 복사한다. 그래서 정답 NLL용 fork의 forward가 잔차를 덮어쓰고, 원본 캐시에서 하는 greedy 디코딩 첫 단계가 그 잔차를 이어받는다. 영향 범위는 `KV4_S8ef_whole` 셀의 pred·score뿐이다. gold NLL은 fork 이전의 2단계 잔차를 쓰므로 정상이다. 논문 4.2절에 적었다. 다음 태그에서 고칠지 그대로 보고할지 결정해야 한다.
+
 ## 남은 TBD (결과 외)
 - 4B Colab에서 2단 경로 vs 단일 forward 일치 확인 수치(로컬 0.8B 수치는 쓰지 않는다).
 - scope=whole의 EF 리셋 시점(2단 prefill과의 관계) 정확한 서술.

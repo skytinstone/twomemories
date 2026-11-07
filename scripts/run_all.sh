@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run phases 1 -> 4 in order. After each phase: copy results to a git worktree of branch results/<tag>,
+# Run phases 1 -> 5 in order. After each phase: copy results to a git worktree of branch results/<tag>,
 # regenerate tables and figures there (paper/), commit and push (merged into main on the Mac).
 #   bash scripts/run_all.sh            # from phase 1; finished phases and cells are skipped
 #   bash scripts/run_all.sh --from 3   # start at phase 3
@@ -28,7 +28,7 @@ else
   REMOTE=origin
 fi
 MODELS=(Qwen/Qwen3.5-4B Qwen/Qwen3.5-9B)
-PHASES=(phase1_probe phase2_bits phase3_tokens phase4_scale)
+PHASES=(phase1_probe phase2_bits phase3_tokens phase4_scale phase5_channels)
 
 publish() {  # $1 = phase name
   local base=HEAD
@@ -52,10 +52,10 @@ publish() {  # $1 = phase name
   echo "pushed $BRANCH"
 }
 
-for i in 1 2 3 4; do
+for i in 1 2 3 4 5; do
   [ "$i" -lt "$FROM" ] && continue
   phase=${PHASES[$((i - 1))]}
-  echo "=== phase $i/4: $phase"
+  echo "=== phase $i/5: $phase"
   set +e
   python scripts/run_phase.py --phase "$phase" --out "$OUT"
   rc=$?

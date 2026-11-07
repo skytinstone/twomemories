@@ -21,8 +21,8 @@
 
 | 축 | 수준 |
 |---|---|
-| KV | full, 4, noise, zero |
-| State | full, 8, 8+EF, 6, 6+EF, noise, zero |
+| KV | full, 4, noise, zero, drop |
+| State | full, 8, 8+EF, 6, 6+EF, noise, zero, zeroconv |
 | Tokens | 100%, 50%, 25% (uniform / random) |
 | Task | DocVQA, ChartQA, TextVQA, POPE |
 

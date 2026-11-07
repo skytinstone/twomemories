@@ -40,3 +40,7 @@ run_all.sh 이어하기 시뮬레이션 중 임시 clone이 실패한 채 명령
 | 유닛 | preflight 1.64 |
 
 상한은 D-25.
+
+## 2026-11-07 로컬 phase 5 점검 (0.8B, MPS, 검증용, 논문 미사용)
+
+`python scripts/run_phase.py --phase phase5_channels --model Qwen/Qwen3.5-0.8B --limit 5 --out results/local`: 12셀 신규, full·blind 8셀 skip. 5샘플 retained(참고만): KV drop ≈ KV zero(DocVQA 0.14 대 0.13, TextVQA 0.31 대 0.32), state zeroconv는 state zero와 비슷하거나 약간 높음, drop+zeroconv는 DocVQA −0.10, TextVQA 0.02(0 근처). ChartQA는 CI가 너무 넓어 판단 불가.

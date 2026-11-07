@@ -90,3 +90,17 @@ L2-local(0.8B, MPS, DocVQA 5샘플, full): 같은 샘플을 batch 2로 복제했
 
 ### D-26. 본 실험 태그 `v0.2-main` — 확정
 v0.1.1-preflight 이후 변경(이어하기, 모니터, phase별 표·그림, 상한)을 담은 태그다. 노트북 셀 2·3과 `colab_setup.sh`의 기본 ref를 v0.2-main으로 바꿨다. runner 변경(append_jsonl, phase 태그)은 결과 줄의 필드와 cell_hash를 바꾸지 않으므로 v0.1.1-preflight의 preflight 결과는 그대로 이어 쓴다(셀 4 재실행 시 전부 skip). 셀 6·7은 status.py가 없는 체크아웃이면 셀 2·3을 다시 돌리라고 안내하고 멈춘다(Colab 오류 `No module named 'status'`).
+
+## 2026-11-07 세션 3 (논문 초안 중 추가 조건)
+
+### D-27. 깨끗한 채널 제거 조건 추가 (phase 5) — 확정 (사용자 승인)
+근거: KV zero는 0인 키도 로짓 0으로 softmax 가중치를 받아 정보 제거와 attention 희석이 섞인다. state zero는 conv1d cache(커널 4)를 남겨 이미지 뒤 첫 3토큰에 마지막 시각 토큰이 섞인다. 가장 가까운 선행연구(Afendulev et al., arXiv:2609.04434)는 KV를 아예 빼고 conv를 state와 함께 버렸다.
+- `kv: drop`: 모든 attention 층 캐시에서 시각 행을 잘라낸다. causal mask가 맞도록 `Session.n_fed`를 n_vis만큼 줄이고, 이후 토큰의 M-RoPE 위치는 그대로 둔다. 테스트: 시각 열을 attention mask로 막은 결과와 logits가 1e-4 안에서 같다(그리고 full·zero와는 다르다).
+- `state: zeroconv`: 모든 GDN 층의 recurrent state와 conv cache를 0으로.
+- phase 5 = {full, KV drop, state zeroconv, 둘 다} × 4태스크(4B). 둘 다는 retained ≈ 0이어야 하는 sanity 셀. 예산 약 9.6유닛, 상한 15.
+- 예산 회계: drop과 zeroconv는 zero와 같이 0 bit로 셈(D-6의 zero 규칙과 일관).
+- 기존 조건의 `Condition.to_dict()`는 그대로라 cell_hash가 바뀌지 않는다(로컬에서 full·blind 8셀이 skip되는 것으로 확인).
+
+### D-28. 태그 `v0.3-channels` — 확정
+phase 5와 위 코드를 담는다. 노트북 셀 2·3과 setup 기본 ref를 v0.3-channels로 바꿨다. **v0.2-main 실행이 phase 4까지 끝난 뒤에만** 갈아탄다. 실행 중에 셀 2·3을 다시 돌리면 다음 phase부터 다른 코드가 돈다. 갈아탄 뒤에는 phase 1–4가 모델 로드 없이 skip되고 phase 5만 돈다. 결과 브랜치는 `results/v0.3-channels`.
+whole-scope EF의 잔차 공유 문제(paper_notes)는 이 태그에서 고치지 않았다. 고치면 해당 셀의 pred가 달라지는데 cell_hash가 같아 resume이 섞이므로, 고칠 때는 조건 이름을 바꾸거나 재실행 절차를 함께 정해야 한다.

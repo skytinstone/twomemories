@@ -1,0 +1,16 @@
+# Phase 5: clean channel removal (decision_log D-27). KV drop removes the visual rows from the attention caches
+# (no softmax mass on them, unlike KV zero); state zeroconv also clears the conv1d cache, so no image information
+# survives in the GDN layers (unlike state zero). Both together leave only the prefix rows: a sanity check that
+# retained is near 0.
+phase: phase5_channels
+models: [Qwen/Qwen3.5-4B]
+tasks: [docvqa, chartqa, textvqa, pope]
+max_pixels: 1310720
+conditions:
+  - {kv: full, state: full}
+  - {kv: drop, state: full}
+  - {kv: full, state: zeroconv}
+  - {kv: drop, state: zeroconv}
+stop_rule: >-
+  Report KV drop next to KV zero and state zeroconv next to state zero. If KV drop + state zeroconv keeps retained
+  clearly above 0 on any task, stop and check the intervention before interpreting phase 1.

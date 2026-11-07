@@ -20,6 +20,7 @@ phase_caps:
   phase2_bits: 30     # est 19.6
   phase3_tokens: 25   # est 16.3
   phase4_scale: 70    # est 29-44
+  phase5_channels: 15 # est ~9.6 (3 new conditions x 900 samples, 4B), D-27
 # Fallback seconds per sample for --dry-run when compute_log has no entry for this model/gpu.
 sec_per_sample_guess:
   default: 3.3   # 9B prior: 4B preflight 1.47 s x 2.25

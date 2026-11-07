@@ -261,3 +261,50 @@ def test_resume_after_killed_write(tmp_path):
     append_jsonl(p, {"sample_id": "c"})
     assert [r["sample_id"] for r in read_jsonl(p)] == ["a", "c"]
     assert [r["sample_id"] for r in tail.new_rows()] == ["c"]
+
+
+def test_kv_drop_equals_masking_visual_columns(model, enc):
+    """Dropping the visual rows from the cache must equal keeping them and masking their attention columns."""
+    from transformers.masking_utils import create_causal_mask
+
+    prep = prepare(model, enc)
+    s, e = enc.vis_span
+    _, dropped, st = _run(model, enc, quant.Condition(kv="drop"))
+    assert st["edits"] == 2 * sum(t == "full_attention" for t in model.config.text_config.layer_types)
+
+    with quant.apply(model, quant.Condition(), enc.vis_span):
+        sess = Session(model)
+        sess.feed(prep.embeds[:, :e], prep.pos[:, :, :e])
+        q_emb, q_pos = prep.embeds[:, e:], prep.pos[:, :, e:]
+        t = q_emb.shape[1]
+        text_row = torch.arange(e, e + t).view(1, 1, -1)
+        pos4 = torch.cat([text_row, q_pos], dim=0)
+        lm = model.model.language_model
+        mask = create_causal_mask(config=lm.config, inputs_embeds=q_emb, attention_mask=None,
+                                  past_key_values=sess.cache, position_ids=text_row[0])
+        if mask is None:   # sdpa may return None for a plain causal mask: build it explicitly
+            kv = torch.arange(e + t)
+            mask = (kv[None, :] <= (e + torch.arange(t))[:, None])[None, None]
+        if mask.dtype == torch.bool:
+            mask = mask.clone()
+            mask[..., s:e] = False
+        else:
+            mask = mask.clone()
+            mask[..., s:e] = torch.finfo(mask.dtype).min
+        out = lm(inputs_embeds=q_emb, position_ids=pos4, past_key_values=sess.cache, use_cache=True,
+                 attention_mask={"full_attention": mask, "linear_attention": None})
+        masked = model.lm_head(out.last_hidden_state)
+    assert torch.allclose(dropped, masked, atol=1e-4), (dropped - masked).abs().max()
+
+
+def test_state_zeroconv_clears_conv_cache(model, enc):
+    sess, logits, st = _run(model, enc, quant.Condition(state="zeroconv"))
+    _, logits_zero, _ = _run(model, enc, quant.Condition(state="zero"))
+    assert torch.isfinite(logits).all()
+    assert not torch.allclose(logits, logits_zero)   # the conv cache carried the last visual tokens
+    with quant.apply(model, quant.Condition(state="zeroconv"), enc.vis_span) as iv:
+        s2 = Session(model)
+        iv.prefill_image(s2, prepare(model, enc).embeds, prepare(model, enc).pos)
+        from transformers.cache_utils import LinearAttentionCacheLayerMixin
+        gdn = [l for l in s2.cache.layers if isinstance(l, LinearAttentionCacheLayerMixin)]
+        assert all(l.recurrent_states[0].abs().max() == 0 and l.conv_states[0].abs().max() == 0 for l in gdn)

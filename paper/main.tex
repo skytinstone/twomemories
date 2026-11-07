@@ -260,12 +260,16 @@ check on 4B (Colab), not the local 0.8B check.}
 \subsection{Interventions}\label{sec:interventions}
 \paragraph{KV side.} For every attention layer, the rows of the visual positions are replaced,
 $K^{\ell}_{\vis}\leftarrow f(K^{\ell}_{\vis})$ and $V^{\ell}_{\vis}\leftarrow f(V^{\ell}_{\vis})$, with
-$f\in\{\mathrm{id},\,Q_4,\,N_4,\,0\}$. Rows of $P$ are not touched, and rows of $Q$ are written later by stage~2.
+$f\in\{\mathrm{id},\,Q_4,\,N_4,\,0\}$, or the visual rows are removed from the cache altogether (\emph{drop}). Rows
+of $P$ are not touched, and rows of $Q$ are written later by stage~2. After a drop, the causal-mask positions of later
+tokens follow the shorter cache while their rotary positions are unchanged, so the result equals keeping the rows and
+masking their attention columns (verified to $10^{-4}$ on a test model).
 Keys are cached after the rotary embedding, so $f$ acts on rotated keys.
 
 \paragraph{State side.} For every GDN layer, $S^{\ell}_e\leftarrow g(S^{\ell}_e)$ with
-$g\in\{\mathrm{id},\,Q_8,\,Q_6,\,Q_8^{\mathrm{EF}},\,Q_6^{\mathrm{EF}},\,N_8,\,0\}$. The convolution cache
-$C^{\ell}_e$ is never altered.
+$g\in\{\mathrm{id},\,Q_8,\,Q_6,\,Q_8^{\mathrm{EF}},\,Q_6^{\mathrm{EF}},\,N_8,\,0\}$; these leave the convolution
+cache $C^{\ell}_e$ in place. A last level, $0_C$, zeroes both $S^{\ell}_e$ and $C^{\ell}_e$, so that nothing of the
+image survives in the GDN layers.
 
 \paragraph{Quantizer.} $Q_b$ is asymmetric uniform round-to-nearest with one scale and zero point per group of
 $G=128$ consecutive elements along the last dimension (the head dimension $d=256$ for keys and values, two groups
@@ -306,8 +310,9 @@ separate forward call, because the state is written once per call (premise 5). F
 $Q_b^{\mathrm{EF}}=Q_b$. Error feedback here therefore acts across at most five stores, unlike decoding in
 \citep{shin2026hybridquant}, where it acts across every generated token.
 
-\paragraph{Zeroing.} $f=0$ sets visual keys and values to zero; $g=0$ sets every GDN state to zero.
-Section~\ref{sec:caveats} states precisely what each removes and what it leaves.
+\paragraph{Zeroing and removal.} $f=0$ sets visual keys and values to zero and $f=$ drop removes them; $g=0$ sets
+every GDN state to zero and $g=0_C$ also its convolution cache. Section~\ref{sec:caveats} states what each removes and
+what it leaves; the pairs (0, drop) and ($0$, $0_C$) separate the two side effects from the removal itself.
 
 \paragraph{Visual-token deletion.} A keep set $I\subset\{0,\dots,n_v-1\}$ of size $n_v'=\max(1,\mathrm{round}(\kappa
 n_v))$, $\kappa\in\{0.5,0.25\}$, is chosen uniformly, $I=\{\lfloor j\,n_v/n_v'\rfloor : j=0,\dots,n_v'-1\}$, or at random
@@ -379,20 +384,22 @@ each zeroed visual position keeps a softmax weight $w_i=1/\mathcal{Z}$, with $\m
 query, and contributes the zero value. The attention output becomes $\sum_{i\notin\vis}w_iv_i$ with
 $\sum_{i\notin\vis}w_i = 1-n_v/\mathcal{Z}<1$: KV zero removes the visual
 content and also shrinks the attention output by the mass the zeroed rows absorb. Masking the visual positions
-would remove the content and renormalise; \citep{afendulev2026recalls} avoid zero keys for this reason.
-\TBD{decide whether to add a KV-drop condition (visual rows removed from the cache); until then KV zero is read as
-removal plus attention dilution.}
+would remove the content and renormalise, which is what the drop level does; \citep{afendulev2026recalls} avoid
+zero keys for this reason. The difference between KV zero and KV drop measures the dilution.
 
 \paragraph{The convolution cache leaks the last visual tokens.} Unlike \citep{afendulev2026recalls}, who drop the
 convolution cache together with the state, we leave it in place, following \citep{shin2026hybridquant}. $C^{\ell}_e$ holds the inputs of the last positions
 of the span, and the causal convolution of kernel $\omega=4$ mixes them into the GDN inputs of the first $\omega-1=3$
 tokens after the span. State zero therefore leaves a short local channel from the last three visual tokens into the
-first question-side tokens (and, through their hidden states, into everything above them).
+first question-side tokens (and, through their hidden states, into everything above them). The $0_C$ level
+removes this channel, and its difference from state zero measures it.
 
 \paragraph{What each intervention leaves.} Table~\ref{tab:channels} lists the carriers of image information left
 after each intervention. The prefix rows of the KV cache precede the image and carry none of it. Zeroing both
 memories leaves only the convolution channel and the attention dilution of the zeroed keys, so $\ret$ of that cell
-bounds what these two side effects contribute.
+bounds what these two side effects contribute. KV drop with state $0_C$ leaves no carrier at all; its $\ret$ should
+be close to 0, and it serves as a check of the protocol (it differs from the blind anchor only in that the prompt
+keeps the vision start and end tokens and the original positions).
 
 \begin{table}[t]
 \centering\small
@@ -409,7 +416,10 @@ KV $Q_4$, $N_4$ & $\sim$ & \checkmark & \checkmark \\
 KV 0 & -- (dilution) & \checkmark & \checkmark \\
 state $Q_b$, $Q_b^{\mathrm{EF}}$, $N_8$ & \checkmark & $\sim$ & \checkmark \\
 state 0 & \checkmark & -- & \checkmark \\
+KV drop & -- & \checkmark & \checkmark \\
+state $0_C$ & \checkmark & -- & -- \\
 KV 0 + state 0 & -- (dilution) & -- & \checkmark \\
+KV drop + state $0_C$ & -- & -- & -- \\
 deletion, keep $\kappa$ & $\kappa n_v$ rows & $\kappa n_v$ tokens & \checkmark \\
 \bottomrule
 \end{tabular}
@@ -446,8 +456,8 @@ chat template without a system prompt; the template closes an empty thinking blo
 $g\in\{Q_8,Q_8^{\mathrm{EF}},Q_6,Q_6^{\mathrm{EF}},N_8,0\}$ with the KV unaltered; and both zeroed. Phase 2 (bits):
 the state levels alone and with $f=Q_4$, and the two every-write cells (KV4 with $Q_8$ and $Q_8^{\mathrm{EF}}$).
 Phase 3 (tokens versus bits): $\kappa\in\{1,0.5,0.25\}$ uniform, with KV at 16 or 4 bits, and $\kappa=0.5$ random.
-Phase 4 (9B): full, KV zero, state zero, KV4 with $Q_8^{\mathrm{EF}}$, and $\kappa=0.5$ uniform. Each condition
-also has the two anchors per task. Batch size 1 and greedy decoding throughout.
+Phase 4 (9B): full, KV zero, state zero, KV4 with $Q_8^{\mathrm{EF}}$, and $\kappa=0.5$ uniform. Phase 5 (clean
+removal, 4B): KV drop, state $0_C$, and both. Each condition also has the two anchors per task. Batch size 1 and greedy decoding throughout.
 
 \paragraph{Compute.} One NVIDIA A100-SXM4-80GB on Google Colab. A 4B preflight (22 conditions $\times$ 4 tasks
 $\times$ 5 samples) took 1.47\,s per sample on average, with a peak of 9.3\,GB of GPU memory
@@ -458,7 +468,8 @@ $\times$ 5 samples) took 1.47\,s per sample on average, with a peak of 9.3\,GB o
 \TBD{Figure: retained per condition and task with 95\% CIs (paper/figures/retained\_Qwen3.5-4B.pdf). Table:
 phase-1 retained. Text: KV zero vs state zero; KV noise vs KV4; state noise vs state 8 (structure vs energy, cf.\
 the noise control in \citep{shin2026hybridquant}); both zeroed versus blind (should be near 0 unless the conv leak
-carries information).}
+carries information); phase 5: KV drop vs KV zero (dilution), state $0_C$ vs state zero (conv channel), KV drop +
+state $0_C$ (protocol check, $\ret\approx0$).}
 
 \subsection{How many bits each memory needs after reading}\label{sec:res-bits}
 \TBD{State 8/6 with and without EF, alone and with KV4; P3 (one-shot versus every-write at KV4 with $Q_8$ and
@@ -480,7 +491,7 @@ $\kappa\times b_{kv}$ grid as a frontier against MB; uniform versus random at $\
 \section{Discussion and Limitations}
 \TBD{Practical reading for pruning and KV compression of hybrid VLMs.}
 \paragraph{Limitations.} (i) KV zero keeps softmax mass on the zeroed rows and state zero leaves the convolution
-cache (Section~\ref{sec:caveats}); neither is a perfect deletion. (ii) Each intervention acts once, after the
+cache (Section~\ref{sec:caveats}); the drop and $0_C$ levels remove these side effects but are run on 4B only. (ii) Each intervention acts once, after the
 image; it does not model a cache that stays quantized while the answer is generated, except for the two
 every-write cells. (iii) $\ret$ is measured with the loss of one reference answer per sample; the task scores
 check that it tracks answer quality, but a reference that the model would phrase differently inflates both anchors.
@@ -532,7 +543,8 @@ Error feedback during the image needs one forward call per 256-token chunk \eqre
 \end{center}
 
 \section{Conditions}\label{app:conditions}
-All 22 conditions on Qwen3.5-4B, with the phases that run them; phase 4 runs the five marked P4 on Qwen3.5-9B.
+The 22 conditions of phases 1--3 and the three of phase 5 on Qwen3.5-4B, with the phases that run them; phase 4
+runs the five marked P4 on Qwen3.5-9B.
 Bits are the charges of \eqref{eq:mb}. Every task also has the blind anchor.
 \begin{center}\small
 \begin{tabular}{lllccccc}
@@ -561,6 +573,9 @@ KV4\_Sfull\_T50u & $Q_4$ & id & 50\% uniform & image & P3 & 4 & 32 \\
 KVfull\_Sfull\_T25u & id & id & 25\% uniform & image & P3 & 16 & 32 \\
 KV4\_Sfull\_T25u & $Q_4$ & id & 25\% uniform & image & P3 & 4 & 32 \\
 KVfull\_Sfull\_T50r & id & id & 50\% random & image & P3 & 16 & 32 \\
+KVdrop\_Sfull & drop & id & all & image & P5 & 0 & 32 \\
+KVfull\_Szeroconv & id & $0_C$ & all & image & P5 & 16 & 0 \\
+KVdrop\_Szeroconv & drop & $0_C$ & all & image & P5 & 0 & 0 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -579,6 +594,7 @@ phase 1 & 4B & \TBD{} & & & \\
 phase 2 & 4B & \TBD{} & & & \\
 phase 3 & 4B & \TBD{} & & & \\
 phase 4 & 9B & \TBD{} & & & \\
+phase 5 & 4B & \TBD{} & & & \\
 \bottomrule
 \end{tabular}
 \end{center}

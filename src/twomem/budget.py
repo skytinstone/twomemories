@@ -9,7 +9,7 @@ MB = 1e6 bytes. Element counts come from ``hybridquant.budget.cache_sizes``
 
 Bits per level: KV full = 16 (bf16 cache), state full = 32 (the cache stores
 fp32, premise 3), quantized = its bit-width, noise = the matched bit-width
-(4 for KV, 8 for state), zero = 0. All KV rows are charged at kv_bits, also
+(4 for KV, 8 for state), zero / drop / zeroconv = 0. All KV rows are charged at kv_bits, also
 under scope="image" where the text rows are actually left at 16 bits; this is
 the deployment accounting used for the iso-budget comparison (Table 5).
 """
@@ -26,13 +26,13 @@ STATE_FULL_BITS = 32
 
 
 def kv_bits(level: str) -> int:
-    named = {"full": KV_FULL_BITS, "noise": KV_NOISE_BITS, "zero": 0}
+    named = {"full": KV_FULL_BITS, "noise": KV_NOISE_BITS, "zero": 0, "drop": 0}
     return named[level] if level in named else int(level)
 
 
 def state_bits(level: str) -> int:
-    if level in ("full", "noise", "zero"):
-        return {"full": STATE_FULL_BITS, "noise": STATE_NOISE_BITS, "zero": 0}[level]
+    if level in ("full", "noise", "zero", "zeroconv"):
+        return {"full": STATE_FULL_BITS, "noise": STATE_NOISE_BITS, "zero": 0, "zeroconv": 0}[level]
     return int(level[0])
 
 

@@ -1,6 +1,6 @@
 """Progress of running or finished phases, read from the result files only (safe while a run is writing).
 
-  python scripts/status.py --out "$TWOMEM_RESULTS"                     # phases 1-4, once
+  python scripts/status.py --out "$TWOMEM_RESULTS"                     # phases 1-5, once
   python scripts/status.py --out "$TWOMEM_RESULTS" --watch 3           # refresh every 3 s
   python scripts/status.py --phases preflight --set full --model Qwen/Qwen3.5-4B --limit 5
 
@@ -32,7 +32,7 @@ from run_phase import CONFIGS, load_conditions, sec_per_sample  # noqa: E402
 from twomem import data  # noqa: E402
 from twomem.runner import RESULTS, cell_hash, cell_path, gpu_name, subset_id_of, units_per_hour  # noqa: E402
 
-PHASES = ["phase1_probe", "phase2_bits", "phase3_tokens", "phase4_scale"]
+PHASES = ["phase1_probe", "phase2_bits", "phase3_tokens", "phase4_scale", "phase5_channels"]
 TZ = ZoneInfo("Asia/Seoul")
 RATE_WINDOW = 900   # seconds of recent rows used for the wall-clock rate
 

@@ -32,6 +32,7 @@ TABLE2_ROWS = [
     Condition(state="noise"), Condition(state="zero"), Condition(kv="zero", state="zero"),
     Condition(kv="4", state="8"), Condition(kv="4", state="8ef"),
     Condition(kv="4", state="8", scope="whole"), Condition(kv="4", state="8ef", scope="whole"),
+    Condition(kv="drop"), Condition(state="zeroconv"), Condition(kv="drop", state="zeroconv"),
 ]
 TABLE5_TOKENS = [(1.0, "none"), (0.5, "uniform"), (0.25, "uniform")]
 TABLE5_KV = ["full", "4"]

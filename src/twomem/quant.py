@@ -10,10 +10,16 @@ store Q(S + r) at every chunk boundary, carrying r = (S + r) - Q(S + r) to the
 next boundary (premise 5: the library writes the state once per forward, so
 chunks are separate forward calls; see docs/assumptions.md).
 
+``drop`` (KV) removes the visual rows from every attention layer's cache instead of zeroing them, so no
+softmax mass goes to them; the session's token count is reduced by n_vis so the causal mask stays aligned,
+and M-RoPE positions of later tokens are unchanged. ``zeroconv`` (state) zeroes the recurrent state and the
+conv1d cache of every GDN layer, so no image information survives in the GDN layers at all.
+
 scope="whole": hybridquant's store-time hooks on every write of the whole run
 (prefill and every decode step), i.e. the setting of the first paper.
 
-The conv1d state (last ``kernel_size`` inputs) is never touched, as in hybridquant.
+The conv1d state (last ``kernel_size`` inputs) is only touched by ``zeroconv``; elsewhere it is kept, as in
+hybridquant.
 """
 from __future__ import annotations
 
@@ -25,8 +31,8 @@ from hybridquant import HybridQuantConfig, QuantSpec, QuantStats, fake_quant, qu
 
 __all__ = ["Condition", "KV_LEVELS", "STATE_LEVELS", "EF_CHUNK", "GROUP", "NOISE_SEED", "Intervention", "apply"]
 
-KV_LEVELS = ("full", "4", "noise", "zero")
-STATE_LEVELS = ("full", "8", "8ef", "6", "6ef", "noise", "zero")
+KV_LEVELS = ("full", "4", "noise", "zero", "drop")
+STATE_LEVELS = ("full", "8", "8ef", "6", "6ef", "noise", "zero", "zeroconv")
 EF_CHUNK = 256      # visual tokens per prefill chunk for error feedback
 GROUP = 128         # quantization group along the last dim (hybridquant default)
 NOISE_SEED = 0
@@ -55,7 +61,7 @@ class Condition:
             raise ValueError("token_method must be 'none' exactly when token_keep == 1.0")
         if self.scope not in ("image", "whole"):
             raise ValueError(f"scope={self.scope!r}")
-        if self.scope == "whole" and ("zero" in (self.kv, self.state)):
+        if self.scope == "whole" and {self.kv, self.state} & {"zero", "drop", "zeroconv"}:
             raise ValueError("scope='whole' supports bit-width and noise conditions only")
 
     @property
@@ -78,7 +84,7 @@ class Condition:
 
 
 def _state_spec(level: str) -> QuantSpec:
-    if level in ("full", "zero"):
+    if level in ("full", "zero", "zeroconv"):
         return QuantSpec()
     if level == "noise":
         return QuantSpec(STATE_NOISE_BITS, GROUP, noise_match=True)
@@ -132,14 +138,20 @@ class Intervention:
             session.feed(embeds[:, c:c_end], pos[:, :, c:c_end])
             self._quant_states_ef(session.cache, spec, residuals)
             self.n_chunks += 1
-        self._edit_kv(session.cache)
+        self._apply_kv(session)
 
     # -- edits ---------------------------------------------------------------
     def _edit_after_image(self, session) -> None:
         if self.cond.scope != "image":
             return
-        self._edit_kv(session.cache)
+        self._apply_kv(session)
         self._edit_states(session.cache)
+
+    def _apply_kv(self, session) -> None:
+        if self.cond.kv == "drop":
+            self._drop_kv(session)
+        else:
+            self._edit_kv(session.cache)
 
     def _attn_layers(self, cache):
         from transformers.cache_utils import DynamicLayer, LinearAttentionCacheLayerMixin
@@ -169,6 +181,20 @@ class Intervention:
                 self.edits += 1
 
     @torch.no_grad()
+    def _drop_kv(self, session) -> None:
+        if self.cond.scope != "image":
+            return
+        s, e = self.vis_span
+        for layer in self._attn_layers(session.cache):
+            if layer.keys.shape[-2] != session.n_fed:
+                raise RuntimeError(f"cache length {layer.keys.shape[-2]} != tokens fed {session.n_fed}")
+            for name in ("keys", "values"):
+                t = getattr(layer, name)
+                setattr(layer, name, torch.cat([t[:, :, :s, :], t[:, :, e:, :]], dim=2))
+                self.edits += 1
+        session.n_fed -= e - s   # text row of the position ids (causal mask) follows the shorter cache
+
+    @torch.no_grad()
     def _edit_states(self, cache) -> None:
         level = self.cond.state
         if level == "full":
@@ -176,7 +202,11 @@ class Intervention:
         spec = _state_spec(level)
         for layer in self._gdn_layers(cache):
             st = layer.recurrent_states[0]
-            if level == "zero":
+            if level == "zeroconv":
+                st.zero_()
+                layer.conv_states[0].zero_()
+                self.edits += 1
+            elif level == "zero":
                 st.zero_()
             else:
                 st.copy_(fake_quant(st, spec, _gen(st.device, NOISE_SEED) if spec.noise_match else None))

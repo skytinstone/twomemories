@@ -68,3 +68,6 @@ L2-local(0.8B, MPS, DocVQA 5샘플, full): 같은 샘플을 batch 2로 복제했
 
 ### D-20. 노트북 셀 5 dry-run 루프를 subprocess로 — 확정
 `!... --phase {ph} ... "$TWOMEM_RESULTS"`에서 IPython이 `$TWOMEM_RESULTS`를 파이썬 변수로 확장하려다 실패하면 줄 전체를 확장하지 않아 `{ph}`가 그대로 넘어갔다(`configs/{ph}.yaml` 없음). `subprocess.run(['bash', '-c', ...])`로 바꿨다. 셀 4는 `{}`가 없어 영향 없음.
+
+### D-21. 본 실험은 백그라운드 실행 + 모니터 셀 — 확정
+셀 6이 `!bash scripts/run_all.sh`를 포그라운드로 돌리면 몇 시간 동안 커널이 막혀 진행을 볼 수 없다. 셀 6은 `subprocess.Popen(start_new_session=True)`로 띄우고 바로 끝나며, 셀 7이 60초마다 `scripts/status.py`를 호출한다. status는 결과 파일만 읽는다(셀별 jsonl 줄 수를 cell_hash로 세고, 유닛은 cap과 같은 compute_log의 phase 태그 합). 시작 전 phase의 남은 시간은 같은 모델의 이전 셀 평균(`--dry-run`과 같은 추정). 로그는 `MyDrive/twomemories/logs/`에 둔다. `results/` 안에 두면 run_all이 커밋하므로 push 오류 메시지 같은 것이 레포에 들어갈 수 있다. 셀 8은 프로세스 그룹에 SIGTERM을 보낸다. 끊긴 셀의 유닛은 compute_log에 남지 않는다(셀 끝에 기록). Colab이 실행 중인 셀이 없을 때 런타임을 끊는지는 UNVERIFIED라 셀 7을 켜 두도록 안내한다. status.py는 다음 태그(D-12 확정 후 본 실험 태그)부터 체크아웃에 들어간다.

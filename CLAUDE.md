@@ -47,6 +47,7 @@ pytest -q                                              # CPU smoke (tiny model)
 python scripts/check_l1.py                             # 0.8B, MPS
 python scripts/run_phase.py --phase preflight --limit 5
 python scripts/run_phase.py --phase phase1_probe --dry-run
+python scripts/status.py --out results/local --phases preflight --model Qwen/Qwen3.5-0.8B --limit 5   # progress
 python analysis/make_tables.py
 ```
 

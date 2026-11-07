@@ -1,0 +1,126 @@
+% Figure 1: Qwen3.5 hybrid block stack, its two inference memories and the intervention points.
+% Drawn in the style of an architecture diagram (stacked sublayers, residual paths, repeat counts).
+% Structure from the model code: pre-norm layers, dense MLP; 4B/9B: 8 x (3 GDN + 1 gated attention).
+\begin{tikzpicture}[
+  font=\small, >={Stealth[length=4pt]}, line width=0.6pt,
+  blk/.style={draw=black!70, rounded corners=3pt, minimum width=3.0cm, minimum height=0.62cm, align=center},
+  nrm/.style={blk, fill=normc, minimum height=0.40cm, font=\footnotesize},
+  gdn/.style={blk, fill=gdnc},
+  att/.style={blk, fill=attc},
+  ffn/.style={blk, fill=ffnc},
+  emb/.style={blk, fill=embc, minimum width=2.4cm},
+  add/.style={circle, draw=black!70, fill=white, inner sep=0pt, minimum size=0.36cm, font=\footnotesize},
+  mem/.style={draw=black!70, rounded corners=3pt, fill=memc, align=left, font=\footnotesize, inner sep=4pt},
+  cut/.style={draw=cutc, line width=0.9pt, dash pattern=on 3pt off 2pt, rounded corners=2pt},
+  seg/.style={draw=black!60, minimum height=0.5cm, inner sep=0pt, font=\footnotesize, anchor=west},
+]
+\definecolor{normc}{HTML}{F4F1BB}
+\definecolor{gdnc}{HTML}{CDE8C3}
+\definecolor{attc}{HTML}{FAD7B5}
+\definecolor{ffnc}{HTML}{C8E3F5}
+\definecolor{embc}{HTML}{F9CFD3}
+\definecolor{memc}{HTML}{F7F7F7}
+\definecolor{viscol}{HTML}{E8933A}
+\definecolor{cutc}{HTML}{C0392B}
+
+% ---------------- (a) block stack
+% inputs
+\node[emb] (temb) at (-1.4,-1.55) {Token\\Embedding};
+\node[emb] (venc) at ( 1.4,-1.55) {Vision Encoder\\{\scriptsize patch 16, $2{\times}2$ merge}};
+\node[font=\footnotesize] (tin) at (-1.4,-2.6) {text tokens};
+\node[font=\footnotesize] (iin) at ( 1.4,-2.6) {image};
+\draw[->] (tin) -- (temb);
+\draw[->] (iin) -- (venc);
+\node[add] (fuse) at (0,-0.35) {};
+\draw (fuse.north) -- (fuse.south) (fuse.west) -- (fuse.east);
+\draw[->] (temb.north) |- (fuse.west);
+\draw[->] (venc.north) |- (fuse.east);
+\node[font=\scriptsize, anchor=west] at ($(venc.north)!0.5!(venc.north|-fuse)+(0.06,0)$) {$n_v$ visual tokens};
+\node[font=\scriptsize, anchor=south east, align=right] at ($(temb.north)+(-0.05,0.05)$) {scatter into\\placeholders};
+
+% GDN layer (repeated 3x)
+\node[nrm] (n1) at (0,0.85) {RMSNorm};
+\node[gdn] (gdn) at (0,1.55) {Gated DeltaNet};
+\node[add] (a1) at (0,2.22) {$+$};
+\node[nrm] (n2) at (0,2.75) {RMSNorm};
+\node[ffn] (f1) at (0,3.42) {Feed Forward};
+\node[add] (a2) at (0,4.09) {$+$};
+% gated attention layer (once)
+\node[nrm] (n3) at (0,5.05) {RMSNorm};
+\node[att] (att) at (0,5.75) {Gated Attention\\[-1pt]{\scriptsize 16 query / 4 KV heads}};
+\node[add] (a3) at (0,6.47) {$+$};
+\node[nrm] (n4) at (0,7.00) {RMSNorm};
+\node[ffn] (f2) at (0,7.67) {Feed Forward};
+\node[add] (a4) at (0,8.34) {$+$};
+% head
+\node[nrm] (nf) at (0,9.20) {RMSNorm};
+\node[blk, fill=white] (lin) at (0,9.85) {Linear};
+\node[blk, fill=white] (sm) at (0,10.55) {Softmax};
+\node[font=\footnotesize] (outp) at (0,11.3) {output probabilities};
+
+\draw[->] (fuse.north) -- (n1.south);
+\foreach \a/\b in {n1/gdn, gdn/a1, a1/n2, n2/f1, f1/a2, a2/n3, n3/att, att/a3, a3/n4, n4/f2, f2/a4, a4/nf, nf/lin, lin/sm, sm/outp}
+  \draw[->] (\a.north) -- (\b.south);
+
+% residual paths
+\foreach \n/\a in {n1/a1, n2/a2, n3/a3, n4/a4} {
+  \draw[->] ($(\n.south)+(0,-0.12)$) -- ++(-1.8,0) |- (\a.west);
+  \fill ($(\n.south)+(0,-0.12)$) circle (1.1pt);
+}
+
+% repeat containers
+\coordinate (r3l) at ($(n1.south)+(-2.0,-0.18)$);
+\coordinate (r3r) at ($(a2.north)+(1.75,0.1)$);
+\coordinate (r8l) at ($(n1.south)+(-2.25,-0.42)$);
+\coordinate (r8r) at ($(a4.north)+(1.95,0.2)$);
+\begin{scope}[on background layer]
+  \draw[black!70, fill=black!6, rounded corners=8pt] (r8l) rectangle (r8r);
+  \draw[black!55, fill=white, rounded corners=6pt, dash pattern=on 2pt off 1.5pt] (r3l) rectangle (r3r);
+\end{scope}
+\node[anchor=east, font=\normalsize] at ($(r3l)!0.5!(r3l|-r3r)+(-0.3,0)$) {$3\times$};
+\node[anchor=east, font=\normalsize] at ($(r8l|-n3)+(-0.1,0.35)$) {$8\times$};
+
+% ---------------- memories beside the mixers
+\node[mem, anchor=west, text width=4.3cm] (state) at ($(gdn.east)+(1.55,0)$)
+  {\textbf{Recurrent state} (each GDN layer)\\
+   $S^{\ell}\in\mathbb{R}^{32\times128\times128}$, fp32, 50.3\,MB\\
+   + conv cache (last 3 inputs)\\
+   fixed size, updated by every token};
+\draw[<->] (gdn.east) -- (state.west) node[midway, above, font=\scriptsize] {read/write};
+\node[cut, fit=(state), inner sep=3pt] (gcut) {};
+\node[anchor=north west, text=cutc, font=\footnotesize] at (gcut.south west)
+  {$g$: id, $Q_8$, $Q_6$, $Q^{\mathrm{EF}}_{8}$, $Q^{\mathrm{EF}}_{6}$, $N_8$, $0$, $0_C$};
+
+\node[mem, anchor=west, text width=4.3cm, minimum height=2.05cm] (kv) at ($(att.east)+(1.55,0.12)$) {};
+\node[anchor=north west, font=\footnotesize] at ($(kv.north west)+(0.04,-0.03)$) {\textbf{KV cache} (each attention layer)};
+\foreach \i in {0,...,15} {
+  \pgfmathsetmacro{\xx}{0.15+\i*0.285}
+  \ifnum\i<3
+    \fill[black!30] ($(kv.south west)+(\xx,0.78)$) rectangle ++(0.19,0.62);
+  \else\ifnum\i<12
+    \fill[viscol] ($(kv.south west)+(\xx,0.78)$) rectangle ++(0.19,0.62);
+  \else
+    \draw[black!45, dash pattern=on 1pt off 1pt] ($(kv.south west)+(\xx,0.78)$) rectangle ++(0.19,0.62);
+  \fi\fi
+}
+\node[anchor=south west, font=\scriptsize, align=left] at ($(kv.south west)+(0.04,0.04)$)
+  {one row per token: prefix $P$, \textcolor{viscol}{visual rows $\mathcal{V}$}\\(32.8\,kB each); $Q$ added in stage 2};
+\draw[<->] (att.east) -- (att.east -| kv.west) node[midway, above, font=\scriptsize] {append/read};
+\node[cut, fit=(kv), inner sep=3pt] (fcut) {};
+\node[anchor=north west, text=cutc, font=\footnotesize] at (fcut.south west)
+  {$f$ on visual rows: id, $Q_4$, $N_4$, $0$, drop};
+
+% ---------------- (b) two-stage prefill timeline
+\coordinate (tl) at (3.25,-2.05);
+\node[seg, fill=black!12, minimum width=0.75cm] (sP) at (tl) {$P$};
+\node[seg, fill=viscol!45, minimum width=2.35cm] (sV) at (sP.east) {image span $\mathcal{V}$};
+\node[seg, fill=black!12, minimum width=1.0cm] (sQ) at (sV.east) {$Q$};
+\node[seg, fill=white, minimum width=0.95cm] (sA) at (sQ.east) {answer};
+\draw[cutc, line width=1pt] ($(sV.north east)+(0,0.42)$) -- ($(sV.south east)+(0,-0.12)$)
+  node[below, font=\scriptsize] {$e$: apply $f$ or $g$ once};
+\draw[decorate, decoration={brace, amplitude=3pt}] ($(sP.north west)+(0,0.08)$) -- ($(sV.north east)+(-0.04,0.08)$)
+  node[midway, above=3pt, font=\scriptsize] {stage 1: unaltered};
+\draw[decorate, decoration={brace, amplitude=3pt}] ($(sQ.north west)+(0.04,0.08)$) -- ($(sA.north east)+(0,0.08)$)
+  node[midway, above=3pt, font=\scriptsize, align=center] {stage 2 reads the\\altered memory};
+\node[anchor=south west, font=\footnotesize\bfseries] at ($(sP.north west)+(0,0.75)$) {Two-stage prefill};
+\end{tikzpicture}

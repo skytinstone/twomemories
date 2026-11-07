@@ -39,7 +39,7 @@
 - 첫 논문은 arXiv에 없음 → `@misc` 미발표 원고로 인용.
 
 ## 2026-11-07 2차 수정 (코드 변경 없이 원고만)
-- Figure 1 개요 그림 추가: `paper/make_overview.py` → `paper/figures/overview.{pdf,png}`. 수치는 캐시 크기뿐.
+- Figure 1 개요 그림 추가(이후 TikZ 아키텍처 그림으로 교체, 아래 3차 수정).
 - 관련 연구: knockout 3편(Kaduri, Zhang, Neo)은 원문 초록으로 확인한 한 문장씩. Salazar et al.(2607.03358, 경로 대체·fallback), DTP(ICLR 2026, Mamba MLLM 가지치기), InfiniteVL(2512.08829, GDN 하이브리드 VLM) 추가.
 - 양자화 오차 상한 |Q_b(x)−x| ≤ σ/2 = 그룹 범위의 1/(2(2^b−1)): 4bit 3.3%, 6bit 0.79%, 8bit 0.20%.
 - retained를 샘플 가중 평균으로 분해(식 12). 두 번째 등호는 모든 샘플에서 B_i ≠ F_i일 때만 성립한다고 명시.
@@ -48,6 +48,10 @@
 - **phase 3의 같은 메모리 비교 짝 정정**: 이전 TBD의 "κ=0.5@16bit vs κ=1@4bit"는 8 vs 4 bit라 같지 않다. 맞는 짝은 κ=0.25@16bit vs κ=1@4bit(둘 다 4 bit). 텍스트 행은 16 vs 4 bit로 다르다.
 - 한계 (iv): 제거 실험은 평소 경로가 아니라 대체(fallback) 가능성을 잴 수 있다(Salazar et al.).
 - 부록 B 조건 표(22개, phase, 비트), 부록 C 컴퓨팅 표(preflight 행만 채움).
+
+## 2026-11-07 3차 수정 (사용자 요청: 형식)
+- Figure 1을 TikZ 아키텍처 흐름도로 교체: `paper/figures/architecture.tex`. "Attention Is All You Need" Figure 1 형식(층을 쌓은 블록, 잔차 경로, 반복 횟수 3×·8×). 블록 구성은 모델 코드 기준: pre-norm(RMSNorm → 믹서 → +, RMSNorm → FFN → +), dense FFN, Gated Attention(query 16 / KV 4 헤드). 오른쪽에 두 메모리(KV cache, recurrent state + conv)와 개입 f·g, 아래에 2단계 prefill 타임라인.
+- 형식을 NeurIPS 2017 스타일로: 1단, 본문 5.5×9인치, Times 본문 + Computer Modern 수식, 제목 위 4pt·아래 1pt 가로선, 가운데 "Abstract"와 좌우 0.5인치 들여쓴 초록, 문단 들여쓰기 없음·문단 간격 5.5pt, 섹션 제목 12pt 굵게. 공식 스타일 파일이 아니라 그 설정을 재현한 것이다. 키워드 줄은 그 스타일에 없어 뺐다.
 
 ## 코드 검토에서 찾은 문제 (지금은 고치지 않음, Colab 실행 중)
 - **whole-scope EF의 잔차 공유**: hybridquant의 EF 잔차는 `stats.ef_residuals` 하나이고, `Session.fork()`의 deepcopy는 캐시만 복사한다. 그래서 정답 NLL용 fork의 forward가 잔차를 덮어쓰고, 원본 캐시에서 하는 greedy 디코딩 첫 단계가 그 잔차를 이어받는다. 영향 범위는 `KV4_S8ef_whole` 셀의 pred·score뿐이다. gold NLL은 fork 이전의 2단계 잔차를 쓰므로 정상이다. 논문 4.2절에 적었다. 다음 태그에서 고칠지 그대로 보고할지 결정해야 한다.

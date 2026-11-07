@@ -1,11 +1,13 @@
 % The Image Lives in Two Memories -- draft.
 % Results are placeholders (\TBD) until phases 1-4 are merged from results/v0.2-main.
 % Every number outside \TBD comes from the code, the model configs or docs/assumptions.md.
-\documentclass[10pt,twocolumn]{article}
-\usepackage[a4paper,margin=2cm,columnsep=0.7cm]{geometry}
+\documentclass[10pt]{article}
+% Layout and type follow the NeurIPS 2017 style (as in "Attention Is All You Need"): one column, 5.5in x 9in text
+% block, Times text with Computer Modern math, no paragraph indent, title between rules.
+\usepackage[letterpaper,textwidth=5.5in,textheight=9in,top=1in,hcentering]{geometry}
 \usepackage[T1]{fontenc}
-\usepackage{amsmath,amsthm}   % before newtxmath (\openbox clash)
-\usepackage{newtxtext,newtxmath}
+\usepackage{times}
+\usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs,multirow,array}
 \usepackage{graphicx}
 \usepackage{xcolor}
@@ -13,7 +15,20 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{caption}
-\captionsetup{font=small}
+\usepackage{tikz}
+\usetikzlibrary{positioning,fit,backgrounds,arrows.meta,calc,decorations.pathreplacing}
+\captionsetup{font=small,labelsep=colon}
+
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5.5pt}
+\makeatletter
+\renewcommand\section{\@startsection{section}{1}{\z@}{-2.0ex plus -0.5ex minus -0.2ex}{1.5ex plus 0.3ex minus 0.2ex}{\large\bfseries\raggedright}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}{-1.8ex plus -0.5ex minus -0.2ex}{0.8ex plus 0.2ex}{\normalsize\bfseries\raggedright}}
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}{1.5ex plus 0.5ex minus 0.2ex}{-1em}{\normalsize\bfseries}}
+\makeatother
 
 \newcommand{\TBD}[1]{\textcolor{red}{[TBD: #1]}}
 \newcommand{\R}{\mathbb{R}}
@@ -22,18 +37,22 @@
 \newcommand{\vis}{\mathcal{V}}
 \newtheorem{remark}{Remark}
 
-\title{\Large\bfseries The Image Lives in Two Memories:\\ Visual Information in Hybrid Linear-Attention Vision-Language Models}
-\author{Minseok Shin\\
-\small Horcrux Technologies, Seoul, Republic of Korea\\
-\small \url{https://www.horcruxtechnologies.com}\\
-\small \texttt{horcruxtech.ai@gmail.com}\quad\texttt{stevenshin16@korea.ac.kr}}
-\date{}
-
 \begin{document}
-\twocolumn[
-\maketitle
-\begin{center}\begin{minipage}{0.86\textwidth}
-\textbf{Abstract.}\;
+
+\begin{center}
+\rule{\textwidth}{4pt}\\[0.25in]
+{\fontsize{17}{20}\selectfont\bfseries The Image Lives in Two Memories:\\[2pt]
+Visual Information in Hybrid Linear-Attention Vision-Language Models\par}
+\vspace{0.22in}\rule{\textwidth}{1pt}\\[0.3in]
+\textbf{Minseok Shin}\\
+Horcrux Technologies, Seoul, Republic of Korea\\
+\texttt{horcruxtech.ai@gmail.com}\quad\texttt{stevenshin16@korea.ac.kr}
+\end{center}
+\vspace{0.15in}
+
+\begin{center}{\large\bfseries Abstract}\end{center}
+\vspace{-0.5ex}
+\begin{list}{}{\leftmargin=0.5in\rightmargin=0.5in}\item[]
 Hybrid vision-language models that interleave linear-attention layers with softmax attention read an image into
 two memories at once: the key-value (KV) rows of the visual tokens in the attention layers, and a fixed-size
 recurrent state in the linear-attention layers that has absorbed every visual token. Visual-token pruning and
@@ -45,25 +64,22 @@ memory retains, with paired bootstrap intervals, on DocVQA, ChartQA, TextVQA and
 \TBD{one sentence per finding: (i) KV zero vs state zero retained, per task family; (ii) bits needed by each memory
 after reading, with and without error feedback; (iii) fewer visual tokens versus fewer bits at equal memory;
 (iv) whether 9B agrees.}
-\par\smallskip
-\textbf{Keywords:} vision-language models; hybrid linear attention; Gated DeltaNet; KV cache; recurrent state;
-visual token pruning; quantization; interpretability.
-\end{minipage}\end{center}
-\vspace{1em}
-]
+\end{list}
 
 \section{Introduction}
 
-\begin{figure*}[t]
+\begin{figure}[tbp]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/overview.pdf}
-\caption{Overview. The prompt is read in two stages. After the last image token ($e$) the caches hold the image in
-two memories: the KV rows of the visual tokens in the $L_a=8$ attention layers, and the recurrent state of the
-$L_g=24$ GDN layers, which every visual token has updated. One memory is altered once ($f$ or $g$), the question
-then reads the altered memory, and the reference answer's teacher-forced loss gives the retained ratio $\ret$.
-Sizes for Qwen3.5-4B/9B.}
+\resizebox{0.97\textwidth}{!}{\input{figures/architecture.tex}}
+\caption{Qwen3.5 as a hybrid VLM and the two memories it keeps. Left: the decoder stack (pre-norm layers, eight
+groups of three Gated DeltaNet layers and one gated attention layer for 4B and 9B); visual tokens from the vision
+encoder replace placeholder tokens at the input embedding (early fusion). Right: the recurrent state of each GDN
+layer (fixed size, updated by every token) and the KV cache of each attention layer (one row per token, visual rows
+in orange). The prompt is read in two stages; right after the last image token ($e$) one memory is altered once,
+by $f$ on the visual KV rows or by $g$ on the state (red), and the question and the answer then read the altered
+memory.}
 \label{fig:overview}
-\end{figure*}
+\end{figure}
 
 A transformer vision-language model (VLM) keeps everything it has read about an image in one place: the keys and
 values of the visual tokens, one row per token and layer. Visual-token pruning
@@ -452,8 +468,8 @@ Every question gets the same instruction, ``Answer the question using a single w
 chat template without a system prompt; the template closes an empty thinking block before the answer
 (non-thinking mode).
 
-\paragraph{Conditions.} Phase 1 (which memory): $f\in\{\mathrm{id},Q_4,N_4,0\}$ with the state unaltered;
-$g\in\{Q_8,Q_8^{\mathrm{EF}},Q_6,Q_6^{\mathrm{EF}},N_8,0\}$ with the KV unaltered; and both zeroed. Phase 2 (bits):
+\paragraph{Conditions.} Phase 1 (which memory): $f\in\{Q_4,\,N_4,\,0\}$ with the state unaltered;
+the state levels $Q_8$, $Q_8^{\mathrm{EF}}$, $Q_6$, $Q_6^{\mathrm{EF}}$, $N_8$ and $0$ with the KV unaltered; and both zeroed. Phase 2 (bits):
 the state levels alone and with $f=Q_4$, and the two every-write cells (KV4 with $Q_8$ and $Q_8^{\mathrm{EF}}$).
 Phase 3 (tokens versus bits): $\kappa\in\{1,0.5,0.25\}$ uniform, with KV at 16 or 4 bits, and $\kappa=0.5$ random.
 Phase 4 (9B): full, KV zero, state zero, KV4 with $Q_8^{\mathrm{EF}}$, and $\kappa=0.5$ uniform. Phase 5 (clean
@@ -520,7 +536,6 @@ figures by \texttt{python analysis/figures.py}. Quantization uses the released \
 \bibliography{refs}
 
 \appendix
-\onecolumn
 \section{Implementation premises}\label{app:premises}
 Checked against transformers 5.22.2 (Qwen3.5 modeling and cache code) before any run; file and line references
 are in \texttt{docs/assumptions.md} of the repository.

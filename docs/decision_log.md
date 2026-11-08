@@ -122,3 +122,10 @@ whole-scope EF의 잔차 공유 문제(paper_notes)는 이 태그에서 고치�
 - phase 1, 2, 3, 5를 `run_phase.py --model Qwen/Qwen3.5-0.8B --out results/mac`로 하나씩 돌리고, phase마다 결과를 확인한 뒤 다음으로 넘어간다. phase 4(9B 규모)는 맥에서 하지 않는다.
 - 한계(논문에 명시): 모델 1개, MPS bf16, GDN·conv는 transformers의 PyTorch 참조 구현(fla·causal_conv1d 없음). 4B 확인 실험(Colab 약 12유닛)은 유닛 상황을 보고 따로 정한다.
 - whole-scope EF 잔차 공유 문제는 그대로다. `KV4_S8ef_whole`의 pred/score만 영향, NLL·retained는 무관. 표에 표시한다.
+
+### D-31. NLL은 그대로, 정확도 retained를 주 지표로 — 확정 (사용자 결정, 2026-11-08 23:50)
+근거: 맥 0.8B phase 1. gold NLL은 데이터셋 정답 문자열 그대로(`"no"` 등)라 대소문자만 다른 예측 비율이 원본 조건에서 POPE 37%, DocVQA 20%, ChartQA·TextVQA 1%다. POPE state zero는 정확도 0.87→0.83인데 NLL 1.58→6.51(대문자 "No"/"No." 쪽으로 이동), KV zero는 정확도 0.87→0.68인데 NLL 1.58→1.44.
+- 코드·NLL 정의는 바꾸지 않고 phase 2, 3, 5를 이어서 돌린다.
+- 주 지표: 정확도 retained = (acc_c − acc_blind)/(acc_full − acc_blind), 데이터셋 수준, CI는 같은 대응 부트스트랩. NLL retained는 함께 보고하되 POPE·DocVQA는 대소문자 혼입을 표에 명시한다.
+- 검토했으나 택하지 않은 안: 대소문자 변형 확률을 합친 NLL로 고쳐 phase 1부터 재실행(맥 3.5–4.5 h).
+- 정확도 retained는 분모(acc_full − acc_blind)가 작으면 불안정하다(POPE 0.41이 가장 작음). analysis에 추가 예정.

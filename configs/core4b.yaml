@@ -1,0 +1,16 @@
+# Core check on 4B (D-33): does the 0.8B split between the two memories hold at 4B? Colab, --limit 100 per task.
+# Run once with --limit 5 first (prompt and gate check); the 100-sample run then resumes the same cells.
+phase: core4b
+models: [Qwen/Qwen3.5-4B]
+tasks: [docvqa, chartqa, textvqa, pope]
+max_pixels: 1310720
+conditions:
+  - {kv: full, state: full}
+  - {kv: "4", state: full}
+  - {kv: zero, state: full}
+  - {kv: full, state: "8"}
+  - {kv: full, state: zero}
+  - {kv: "4", state: 8ef}
+stop_rule: >-
+  run_phase stops (exit 3) if a task's unaltered accuracy is below 0.1. After the 5-sample run, check that
+  unaltered accuracy is well above blind on every task before launching the 100-sample run.

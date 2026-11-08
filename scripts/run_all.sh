@@ -3,6 +3,7 @@
 # regenerate tables and figures there (paper/), commit and push (merged into main on the Mac).
 #   bash scripts/run_all.sh            # from phase 1; finished phases and cells are skipped
 #   bash scripts/run_all.sh --from 3   # start at phase 3
+#   bash scripts/run_all.sh --phases core4b --models Qwen/Qwen3.5-4B --limit 100   # other phase list (D-33)
 # Safe to rerun in a new session: results live on Drive (TWOMEM_RESULTS), run_phase skips finished cells, and the
 # worktree is rebuilt on top of the pushed branch, so pushes stay fast-forward. The checkout itself stays at the
 # tag, so every result line carries the tag's commit.
@@ -10,9 +11,15 @@
 set -euo pipefail
 
 FROM=1
+PHASES=(phase1_probe phase2_bits phase3_tokens phase4_scale phase5_channels)
+MODELS=(Qwen/Qwen3.5-4B Qwen/Qwen3.5-9B)   # models the tables and figures are made for
+LIMIT=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --from) FROM=$2; shift 2 ;;
+    --phases) read -ra PHASES <<< "$2"; shift 2 ;;
+    --models) read -ra MODELS <<< "$2"; shift 2 ;;
+    --limit) LIMIT=(--limit "$2"); shift 2 ;;
     *) echo "unknown arg $1" >&2; exit 1 ;;
   esac
 done
@@ -27,8 +34,6 @@ if [ -n "${GH_TOKEN:-}" ]; then
 else
   REMOTE=origin
 fi
-MODELS=(Qwen/Qwen3.5-4B Qwen/Qwen3.5-9B)
-PHASES=(phase1_probe phase2_bits phase3_tokens phase4_scale phase5_channels)
 
 publish() {  # $1 = phase name
   local base=HEAD
@@ -52,12 +57,12 @@ publish() {  # $1 = phase name
   echo "pushed $BRANCH"
 }
 
-for i in 1 2 3 4 5; do
+for i in $(seq 1 ${#PHASES[@]}); do
   [ "$i" -lt "$FROM" ] && continue
   phase=${PHASES[$((i - 1))]}
-  echo "=== phase $i/5: $phase"
+  echo "=== phase $i/${#PHASES[@]}: $phase"
   set +e
-  python scripts/run_phase.py --phase "$phase" --out "$OUT"
+  python scripts/run_phase.py --phase "$phase" ${LIMIT[@]+"${LIMIT[@]}"} --out "$OUT"
   rc=$?
   set -e
   publish "$phase"

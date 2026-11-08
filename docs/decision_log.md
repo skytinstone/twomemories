@@ -137,3 +137,12 @@ whole-scope EF의 잔차 공유 문제(paper_notes)는 이 태그에서 고치�
 - 두 단계 vs 단일 prefill 확인: L1(합성 이미지 1장) 수치를 쓰지 않고, 맥 본 실험이 끝난 뒤 `scripts/check_twostage.py`로 태스크당 처음 50샘플을 다시 잰다. 단일 패스(stock forward) gold NLL/토큰을 `results/mac`의 KVfull_Sfull_image 줄과 비교해 `results/checks/twostage_0.8B.jsonl`에 쓴다. `results/mac` 밖에 두는 것은 표 Index가 섞지 않게 하려는 것이다. 실행 전이라 UNVERIFIED.
 - 부록에 POPE의 NLL·정확도 불일치(대소문자) 예시를 넣는다(D-31). 그림은 analysis/figures.py에 추가하되, 실행 중 dirty 표시를 피하려고 phase 5가 끝난 뒤 고친다.
 - 논문 본문은 0.8B 기준으로 바꿨다(Fig 1, Table 1, §2–4, 부록 B·C). 정확도 retained $\mathcal{R}$가 주 지표, $\mathcal{R}_{\mathrm{NLL}}$이 보조 지표(§3.3).
+
+### D-33. Colab 4B 핵심 확인(core4b), 태그 `v0.5-core4b` — 확정 (사용자 승인, 2026-11-09, 남은 유닛 31.49)
+근거: preprint가 0.8B 단일 모델이라는 한계(D-30, D-32)를 줄이고, 핵심 결론(읽기 태스크의 이미지 정보는 KV에 있다)이 4B에서도 같은지 본다.
+- `configs/core4b.yaml`: 원본, KV4, KV zero, S8, S zero, KV4+S8ef (+ blind) = 7셀 × 4태스크, 4B, `--limit 100`(각 subset의 처음 100샘플). 상한 `core4b: 14`.
+- 예상: 2,800샘플 × 1.42 s(v0.2-main 4B 실측 속도, 코드 경로 동일) × 1.08 오버헤드 ≈ 10.6유닛 + 설치·다운로드. 실행 전 추정이라 UNVERIFIED. 남는 약 20유닛은 다른 실험용.
+- 순서: 노트북 셀 4에서 `--limit 5`로 먼저 돌려(약 0.5유닛) 원본 정확도가 blind보다 확실히 높은지 셀 5에서 확인한 뒤 셀 6에서 100샘플로 이어 돈다(같은 셀이라 5샘플은 다시 돌지 않음). 정확도 gate(0.1 미만이면 exit 3)도 그대로.
+- `run_all.sh`에 `--phases`, `--models`, `--limit` 추가. 인자가 없으면 이전과 같다(phase 1–5, 4B·9B 표).
+- D-32의 "4B는 v2에서"를 번복한다(삭제하지 않음). 논문에는 0.8B 본 결과와 별도로 4B 확인 절을 둔다. 100샘플이라 CI가 넓다는 점을 명시한다.
+- 이 변경은 맥 0.8B 실행 중에 별도 worktree(`../twomem_core4b`, 브랜치 core4b)에서 만들었다. 맥 결과 줄에 -dirty가 찍히지 않게 하려는 것이다. 맥 실행이 끝난 뒤 main에 fast-forward로 합친다.

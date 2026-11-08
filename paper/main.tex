@@ -42,8 +42,8 @@
 
 \begin{center}
 \rule{\textwidth}{4pt}\\[0.25in]
-{\fontsize{17}{20}\selectfont\bfseries The Image Lives in Two Memories:\\[2pt]
-Visual Information in Hybrid Linear-Attention Vision-Language Models\par}
+{\fontsize{17}{20}\selectfont\bfseries Where Does the Image Live?\\[2pt]
+KV Cache and Recurrent State in Hybrid Vision-Language Models\par}
 \vspace{0.22in}\rule{\textwidth}{1pt}\\[0.3in]
 \textbf{Minseok Shin}\\
 Horcrux Technologies, Seoul, Republic of Korea\\
@@ -63,9 +63,15 @@ image token, and let the question and the answer read the altered memory. A data
 anchored at a no-image run and an unaltered run, measures how much of the image's contribution each memory
 retains, with paired bootstrap intervals, on DocVQA, ChartQA, TextVQA and POPE; the same ratio of teacher-forced
 answer losses is reported alongside.
-\TBD{one sentence per finding: (i) KV zero vs state zero retained, per task family; (ii) bits needed by each memory
-after reading, with and without error feedback; (iii) fewer visual tokens versus fewer bits at equal memory;
-(iv) what the clean-removal controls (KV drop, state $0_C$) leave.}
+Removing the visual KV rows leaves at most 7\% of the image's gain on the three reading tasks and 53\% on POPE;
+removing the recurrent state leaves 66--97\% while the convolution cache still passes on the last visual tokens,
+and 33--69\% once it is cleared too, so the state matters for reading but cannot replace the KV rows. Both
+memories are robust to precision after reading: 4-bit KV with a 6-bit state keeps 96--101\% of the gain while
+cutting the stored cache by 4.6--5.0$\times$, and error feedback adds nothing measurable. At equal cost per visual
+token, 4-bit KV for every token keeps 98--100\%, while keeping a quarter of the tokens at 16 bits keeps 31--48\% on
+reading tasks. Clearing all three carriers returns the model to its no-image accuracy. Finally, the state shapes the
+form of the answer: zeroing it moves POPE answers from lower to upper case, which flips the sign of a loss-based
+retained ratio while accuracy barely changes. \TBD{one sentence on the 4B check.}
 \end{list}
 
 \section{Introduction}
@@ -126,15 +132,20 @@ because the state keeps information from discarded tokens \citep{jiang2026statef
 contribution directly, for still images and Gated DeltaNet.
 
 \paragraph{Contributions.}
-\TBD{Final bullets after phases 1, 2, 3 and 5. Planned:}
 \begin{itemize}\setlength\itemsep{1pt}
 \item A one-shot intervention protocol for hybrid VLMs that separates the two memories at the end of the image
 span, with a dataset-level retained ratio and paired bootstrap intervals (Sections~\ref{sec:twostage}--\ref{sec:metric}).
-\item \TBD{Phase 1: which memory carries the image, per task (zero and noise interventions).}
-\item \TBD{Phase 2: bits each memory needs after reading; error feedback during the image prefill; one-shot versus
-every-write quantization.}
-\item \TBD{Phase 3: visual-token deletion versus KV quantization at equal memory.}
-\item \TBD{Phase 5: clean removal (KV drop, state $0_C$): attention dilution and the convolution channel.}
+\item Reading tasks need the visual KV rows: without them the recurrent state supplies at most 7\% of the image's
+gain in accuracy, against 53\% for object presence (Section~\ref{sec:res-probe}).
+\item Three carriers, not two: the convolution cache of the GDN layers raises what is left after zeroing the state
+from 33--69\% to 66--97\%, and removing KV rows, state and convolution cache together returns the model to its
+no-image accuracy (Section~\ref{sec:res-probe}).
+\item After reading, 4-bit KV and a 6-bit state are lossless within the bootstrap intervals, without error
+feedback (Section~\ref{sec:res-bits}); at equal KV cost, quantizing every visual token beats keeping fewer tokens by
+50--70 points of retained gain on reading tasks (Section~\ref{sec:res-tokens}).
+\item A loss-based retained ratio can invert when an intervention changes the answer's form rather than its content;
+we show this for letter case on POPE and report accuracy as the primary measure (Section~\ref{sec:res-scores}).
+\item \TBD{4B check (Section~\ref{sec:res-scale}).}
 \end{itemize}
 
 \section{Related Work}
@@ -481,8 +492,8 @@ as object presence (POPE) may survive through the state alone, as the gist of a 
 carried, and damped by the decay, through the unquantized updates of the question tokens; the repeated injection
 that made the state fragile under every-write quantization \citep{shin2026hybridquant} does not occur, so their loss
 should be well below that of the every-write cells at the same bit-widths. (P4) Error
-feedback can only matter for images with $n_v>256$ ($C>1$). \TBD{keep, revise or drop each prediction against the
-results; report P1--P4 outcomes explicitly.}
+feedback can only matter for images with $n_v>256$ ($C>1$). Section~\ref{sec:res-predictions} reports the outcome of
+each.
 
 \section{Experimental Setup}\label{sec:setup}
 \paragraph{Models.} Qwen3.5-0.8B in all phases run (1, 2, 3 and 5), bf16 weights, the post-trained (non-base)
@@ -504,34 +515,139 @@ the state levels alone and with $f=Q_4$, and the two every-write cells (KV4 with
 Phase 3 (tokens versus bits): $\kappa\in\{1,0.5,0.25\}$ uniform, with KV at 16 or 4 bits, and $\kappa=0.5$ random.
 Phase 5 (clean removal): KV drop, state $0_C$, and both. (Phase 4, five conditions on 9B, is not run.) Each condition also has the two anchors per task. Batch size 1 and greedy decoding throughout.
 
-\paragraph{Compute.} One Apple M3 Pro laptop with 18\,GB of unified memory (MPS backend); no cloud GPU. Phase 1
-took 0.73\,s per sample on average over 10,800 samples (Appendix~\ref{app:compute}). \TBD{total hours of phases
-2, 3 and 5.}
+\paragraph{Compute.} One Apple M3 Pro laptop with 18\,GB of unified memory (MPS backend); no cloud GPU. The four
+phases evaluated 23,400 samples in 4.7 hours of summed per-sample time, 0.54--0.81\,s per sample by phase
+(Appendix~\ref{app:compute}).
 
 \section{Results}
+All numbers are from Qwen3.5-0.8B on the full subsets (Section~\ref{sec:setup}). The unaltered and blind accuracies
+are 0.880/0.053 (DocVQA), 0.745/0.100 (ChartQA), 0.726/0.062 (TextVQA) and 0.867/0.463 (POPE), so $\ret$ is
+defined on every task; POPE has the smallest gap (0.40). Figure~\ref{fig:retained} shows both ratios for every
+condition and Table~\ref{tab:main} the accuracy ratio; the loss ratio and the raw scores are in
+Appendix~\ref{app:results}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/retained_Qwen3.5-0.8B.pdf}
+\caption{Accuracy retained $\ret$ (filled) and loss retained $\ret_{\NLL}$ (open) with 95\% paired bootstrap
+intervals, Qwen3.5-0.8B. $1$: the altered cache supplies the image's full gain; $0$ (dashed): none of it. The loss
+ratio on DocVQA and POPE mixes in the letter case of the reference (Section~\ref{sec:metric}).}
+\label{fig:retained}
+\end{figure}
+
+\begin{table}[t]
+\centering\small
+\caption{Accuracy retained $\ret$ [95\% CI] per condition and task, Qwen3.5-0.8B. KV and state levels as in
+Section~\ref{sec:interventions}; ``ef'': error feedback; ``whole'': every-write quantization of the whole run.}
+\label{tab:main}
+\resizebox{\textwidth}{!}{\input{tables/Qwen3.5-0.8B/table2.tex}}
+\end{table}
+
 \subsection{Which memory carries the image}\label{sec:res-probe}
-\TBD{Figure: retained per condition and task with 95\% CIs (paper/figures/retained\_Qwen3.5-0.8B.pdf; $\ret$ and $\ret_{\NLL}$ side by side). Table:
-phase-1 retained. Text: KV zero vs state zero; KV noise vs KV4; state noise vs state 8 (structure vs energy, cf.\
-the noise control in \citep{shin2026hybridquant}); both zeroed versus blind (should be near 0 unless the conv leak
-carries information); phase 5: KV drop vs KV zero (dilution), state $0_C$ vs state zero (conv channel), KV drop +
-state $0_C$ (protocol check, $\ret\approx0$).}
+\paragraph{The KV rows are necessary for reading.} Zeroing the visual KV rows leaves $\ret=0.02$, $0.02$ and $0.07$
+on DocVQA, ChartQA and TextVQA, all with intervals that include or touch 0: the state, written by every visual token
+and larger than the visual KV rows of every image here, cannot supply the answer to a reading question on its own.
+On POPE it supplies about half ($\ret=0.53$ [0.37, 0.66]). Dropping the rows instead of zeroing them gives the same
+values (0.02, 0.03, 0.07, 0.54), so the softmax mass that zeroed keys absorb (Section~\ref{sec:caveats}) does not
+matter here, and KV zero can be read as removal.
+
+\paragraph{Without the state, most of the gain remains, but less once the convolution cache goes too.} Zeroing the
+state leaves $\ret=0.97$, $0.66$, $0.93$ and $0.91$. That number includes the convolution channel: clearing the
+convolution cache together with the state ($0_C$) lowers it to $0.69$, $0.33$, $0.69$ and $0.48$
+(Figure~\ref{fig:channels}). The KV rows alone therefore carry well under the full gain; the state and the
+convolution cache contribute on every task, most on ChartQA. The size of the convolution effect is out of
+proportion to its width of three visual tokens. These interventions cannot tell whether those tokens carry image
+content into the question or whether clearing them mainly disturbs the GDN layers at the start of the question; the
+POPE cell with both memories zeroed, which keeps only this channel, retains 0.30 [0.13, 0.44], against $\le 0$ on the
+reading tasks.
+
+\paragraph{The protocol closes.} With the KV rows dropped and the state and convolution cache cleared, nothing that
+the image wrote is left, and $\ret$ is $-0.01$, $-0.01$, $-0.01$ and $-0.02$, with every interval covering 0.
+Everything the image contributes reaches the answer through these three carriers.
+
+\paragraph{Matched noise.} Replacing the KV rows by noise of the 4-bit error's RMS is as harmless as 4-bit
+quantization ($\ret\ge0.98$ for both). State noise at the 8-bit error's RMS keeps $0.96$--$0.99$, slightly below $Q_8$
+($0.99$--$1.00$), but within overlapping intervals; at these error sizes the structure of the rounding error does
+not matter.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig_channels.pdf}
+\caption{Accuracy retained when carriers of the image are removed (95\% CI). ``Zero'' keeps the zeroed KV rows in
+the softmax; ``drop'' removes them. ``State zero'' leaves the convolution cache, which still holds the last three
+visual tokens; $0_C$ clears it too.}
+\label{fig:channels}
+\end{figure}
 
 \subsection{How many bits each memory needs after reading}\label{sec:res-bits}
-\TBD{State 8/6 with and without EF, alone and with KV4; P3 (one-shot versus every-write at KV4 with $Q_8$ and
-$Q_8^{\mathrm{EF}}$); P4 (split EF effects by $C$, with the $n_v$ distribution per task from the result rows).}
+Quantizing the state once after the image costs nothing measurable at 8 or 6 bits ($\ret=0.98$--$1.00$), alone or
+together with 4-bit KV (0.96--1.01). With 4-bit KV and a 6-bit state the charged cache falls from 34.3 to 7.4\,MB on
+DocVQA, 24.6 to 5.0 (ChartQA), 28.4 to 5.9 (TextVQA) and 22.6 to 4.5\,MB (POPE) by \eqref{eq:mb}. Error feedback
+during the image prefill makes no difference at either bit-width: every $Q_b$/$Q_b^{\mathrm{EF}}$ pair is within
+0.03 and inside each other's interval, although almost every image spans several 256-token chunks (DocVQA: 188 of
+200 images have five; median $n_v$ is 1,240 for DocVQA, 425 for ChartQA, 768 for TextVQA and 270 for POPE).
+Quantizing every write of the whole run (KV4 with $Q_8$) instead of once costs 0.02 in $\ret_{\NLL}$ on each of
+DocVQA, ChartQA and TextVQA (0.97--0.98 against 0.99--1.00; the intervals at most touch), and 0.01--0.03 in $\ret$,
+inside the intervals.
 
 \subsection{Fewer visual tokens or fewer bits}\label{sec:res-tokens}
 The image's KV rows cost $\kappa\,b_{kv}$ bits per element and original visual token: 16, 8, 4 at
 $\kappa=1,0.5,0.25$ with 16-bit KV, and 4, 2, 1 with 4-bit KV. The equal-memory pair is therefore $\kappa=0.25$ at
 16 bits against $\kappa=1$ at 4 bits (4 bits each); the state (32 bits) is the same in both, and the text rows
-differ (16 versus 4 bits), which \eqref{eq:mb} charges. \TBD{retained and task scores of the pair; the full
-$\kappa\times b_{kv}$ grid as a frontier against MB; uniform versus random at $\kappa=0.5$.}
+differ (16 versus 4 bits), which \eqref{eq:mb} charges. Figure~\ref{fig:tokens} shows the whole grid. At 4 bits per
+element per visual token, quantizing keeps $\ret=1.00$, $1.00$, $0.99$ and $0.98$, while deleting three quarters of
+the tokens keeps $0.31$, $0.35$ and $0.48$ on the reading tasks and $0.90$ on POPE. On the reading tasks, deletion loses 0.25--0.4 of the
+gain for every halving of the tokens, at either bit-width (Appendix~\ref{app:results}, Table~\ref{tab:tokens}). Uniform and random deletion at
+$\kappa=0.5$ agree within their intervals (0.69 against 0.62 on DocVQA, 0.73 against 0.78 on TextVQA). Object
+presence is the exception: POPE keeps 0.88--0.90 at a quarter of the tokens, consistent with POPE keeping half of
+its gain with no visual KV rows at all.
 
-\subsection{Task scores}\label{sec:res-scores}
-\TBD{ANLS / relaxed accuracy / VQA accuracy / POPE F1 per condition; does the ordering agree with $\ret$?}
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/fig_tokens_bits.pdf}
+\caption{Accuracy retained against the bits that the image's KV rows cost per element and original visual token
+($\kappa\,b_{kv}$), with 95\% CI. Each line deletes visual tokens uniformly ($\kappa=1,0.5,0.25$) at a fixed KV
+bit-width. Dotted: the equal-cost pair (all tokens at 4 bits; a quarter of the tokens at 16 bits).}
+\label{fig:tokens}
+\end{figure}
+
+\subsection{Check at 4B}\label{sec:res-scale}
+\TBD{core4b on Qwen3.5-4B (Colab, 100 samples per task): unaltered, KV4, KV zero, state 8, state zero, KV4 with
+$Q_8^{\mathrm{EF}}$; compare the KV zero / state zero split with 0.8B.}
+
+\subsection{Task scores and the loss ratio}\label{sec:res-scores}
+On the three reading tasks accuracy and the loss of the reference order the conditions alike, but not on one
+scale: $\ret_{\NLL}$ is higher than $\ret$ when the visual KV rows are removed (0.21--0.32 against 0.02--0.07) and
+lower when the state is (Figure~\ref{fig:case}, Appendix~\ref{app:pope-case}). On POPE they disagree in sign:
+state zero keeps $\ret=0.91$ but has $\ret_{\NLL}=-0.65$, and the 6-bit state has $\ret_{\NLL}=1.14$ at
+$\ret=0.99$. The greedy answers explain it. The reference is the lower-case word \emph{yes} or \emph{no}; the
+unaltered model writes it capitalised in 40\% of samples, the blind model in 100\%, and after state zero in 91\%,
+after $Q_6$ in 26\%. The loss of the lower-case reference tracks this shift in form, not the correctness of the
+answer. That the state controls the form of the answer parallels the text-only finding that the output language
+and a persona survive through the recurrent state \citep{afendulev2026recalls}. POPE F1 falls further than accuracy
+when the visual KV rows are removed (0.55 against 0.68 under KV zero) and orders the removal conditions somewhat
+differently (Appendix~\ref{app:results}, Table~\ref{tab:scores}).
+
+\subsection{The predictions}\label{sec:res-predictions}
+(P1) Holds: reading tasks lose almost all of the gain without the visual KV rows (0.02--0.07) and keep most of it
+without the state (0.66--0.97). (P2) Holds in part: POPE keeps half of its gain from the state alone (0.53), far more
+than reading tasks, but not all of it. (P3) Holds, with a small margin at these bit-widths: every-write
+quantization costs 0.02 of $\ret_{\NLL}$ more than the one-shot cell, with intervals that at most touch, and
+nothing measurable in accuracy. (P4) Not supported in its premise: error feedback has nothing to correct, since one-shot
+$Q_8$ and $Q_6$ are already lossless, although nearly all images span several chunks.
 
 \section{Discussion and Limitations}
-\TBD{Practical reading for pruning and KV compression of hybrid VLMs.}
+For serving hybrid VLMs, the results point one way. The state cannot stand in for visual KV rows on reading tasks,
+so visual-token pruning that relies on the recurrent state to keep what was deleted \citep{jiang2026stateful} should
+be expected to work for coarse judgements such as object presence and not for reading text. Quantizing the cache
+after the image is read is nearly free: 4-bit KV and a 6-bit state keep the full gain at a fifth of the cache,
+whereas spending the same KV budget on fewer tokens loses half or more of it. The state is the larger memory for
+every image here, so its precision matters for the budget, and 6 bits after reading are enough at this scale. For
+evaluation, a teacher-forced loss on a fixed reference string measures the form of the answer together with its
+content; an intervention on the state, which shapes the form, can then look harmful or helpful while the answers do
+not change.
+
+
 \paragraph{Limitations.} (i) KV zero keeps softmax mass on the zeroed rows and state zero leaves the convolution
 cache (Section~\ref{sec:caveats}); the drop and $0_C$ levels remove these side effects. (ii) Each intervention acts once, after the
 image; it does not model a cache that stays quantized while the answer is generated, except for the two
@@ -540,14 +656,22 @@ reference that the model would phrase or case differently inflates both anchors 
 avoids this but is coarser, since each sample's score is close to binary.
 (iv) Removing a pathway can show what the model is able to fall back on rather than what it normally uses
 \citep{salazar2026pathways}: $\ret$ under KV zero or state zero measures the information the other memory can supply
-on its own, not how much of it the intact model draws from each. (v) Subsets of 200--300 samples per task, a single model (0.8B), one image resolution cap; whether the 4B and 9B
-models, whose memories are $8/3$ times larger, split the image the same way is not tested.
+on its own, not how much of it the intact model draws from each. (v) Subsets of 200--300 samples per task, one model for the full study (0.8B) and a 100-sample check of six
+conditions at 4B (Section~\ref{sec:res-scale}), one image resolution cap. (viii) The removal experiments do not
+separate image content in the convolution cache from the disturbance of clearing it
+(Section~\ref{sec:res-probe}).
 (vi) Quantization is simulated; no memory or speed is saved in these runs. (vii) All runs use the PyTorch reference
-kernels on MPS; bf16 numerics may differ slightly from the fused CUDA kernels used in deployment. Repeating the core
-conditions on 4B and 9B, where the state and KV are larger but the crossover is the same, is left to future work.
+kernels on MPS; bf16 numerics may differ slightly from the fused CUDA kernels used in deployment. The full set of
+conditions on 4B and 9B, whose memories are $8/3$ times larger with the same crossover, is left to future work.
 
 \section{Conclusion}
-\TBD{after results.}
+In a hybrid VLM that reads an image into a softmax-attention KV cache and a Gated DeltaNet state at once, the KV rows
+of the visual tokens are what reading questions depend on: without them the state supplies almost nothing, while
+without the state most of the image's contribution survives, more so when the convolution cache passes on the last
+visual tokens. Object presence is shared more evenly. After reading, both memories tolerate low precision, and
+quantizing every visual token is far better than keeping fewer of them at the same cost. Interventions on the state
+change the form of answers as well as their content, which a loss-based measure confuses with information loss.
+\TBD{one sentence on the 4B check.}
 
 \section*{Acknowledgments}
 This work was carried out by a single author without institutional funding; all experiments ran on the author's
@@ -636,18 +760,54 @@ not recorded in the result rows.
 Run & Model & samples & s/sample & hours \\
 \midrule
 phase 1 & 0.8B & 10,800 & 0.73 & 2.20 \\
-phase 2 & 0.8B & \TBD{} & & \\
-phase 3 & 0.8B & \TBD{} & & \\
-phase 5 & 0.8B & \TBD{} & & \\
+phase 2 & 0.8B & 5,400 & 0.81 & 1.21 \\
+phase 3 & 0.8B & 4,500 & 0.54 & 0.67 \\
+phase 5 & 0.8B & 2,700 & 0.78 & 0.59 \\
+\midrule
+total & 0.8B & 23,400 & 0.72 & 4.67 \\
+check (4B, A100, Colab) & 4B & \TBD{2,800} & & \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \section{Loss and accuracy on POPE}\label{app:pope-case}
-\TBD{examples where $\ret_{\NLL}$ and $\ret$ disagree (state zero: $\ret_{\NLL}=-0.65$, accuracy kept), with the
-casing of the greedy answers per condition; figure from analysis/figures.py.}
+Figure~\ref{fig:case} plots $\ret_{\NLL}$ against $\ret$ for every condition and task. Points on the diagonal agree.
+ChartQA lies on it; DocVQA and TextVQA leave it under state zero, where the loss ratio is lower (0.74 and 0.46 at
+$\ret=0.97$ and $0.93$); POPE leaves it in both directions. On POPE the share of greedy answers that start with a
+capital letter is 0.40 unaltered, 1.00 blind, 0.91 after state zero, 0.96 after state $0_C$, 0.36 after KV zero
+and 0.26 after $Q_6$, while the reference is always lower case.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.55\textwidth]{figures/fig_case.pdf}
+\caption{Loss retained against accuracy retained, one point per condition and task (Qwen3.5-0.8B). Dashed: equality.}
+\label{fig:case}
+\end{figure}
 
 \section{Full results}\label{app:results}
-\TBD{generated by analysis/make\_tables.py from results/**/*.jsonl.}
+Generated by \texttt{analysis/make\_tables.py} from \texttt{results/mac}. $^\dagger$: the loss ratio mixes in the letter
+case of the reference (Section~\ref{sec:metric}).
+
+\begin{table}[h]
+\centering\small
+\caption{Loss retained $\ret_{\NLL}$ [95\% CI], Qwen3.5-0.8B.}
+\label{tab:nll}
+\resizebox{\textwidth}{!}{\input{tables/Qwen3.5-0.8B/table2nll.tex}}
+\end{table}
+
+\begin{table}[h]
+\centering\small
+\caption{Task scores: ANLS (DocVQA), relaxed accuracy (ChartQA), VQA accuracy (TextVQA), accuracy / F1 (POPE).}
+\label{tab:scores}
+\input{tables/Qwen3.5-0.8B/table3.tex}
+\end{table}
+
+\begin{table}[h]
+\centering\small
+\caption{Visual tokens kept (uniform) $\times$ KV bits: charged MB \eqref{eq:mb} and both retained ratios. MB group:
+totals within 10\%; the 18.9\,MB state dominates every total.}
+\label{tab:tokens}
+\resizebox{\textwidth}{!}{\input{tables/Qwen3.5-0.8B/table5.tex}}
+\end{table}
 
 \end{document}

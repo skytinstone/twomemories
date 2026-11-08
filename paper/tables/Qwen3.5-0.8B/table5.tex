@@ -1,34 +1,34 @@
 % mps/cpu rows included (results=results/mac); paper numbers only from results/mac (D-30)
 \begin{tabular}{llcccc c}
 \toprule
-task & tokens & KV bits & total MB & acc retained [95% CI] & loss retained [95% CI] & MB group \\
+task & tokens & KV bits & total MB & acc retained [95\% CI] & loss retained [95\% CI] & MB group \\
 \midrule
-DocVQA$^\dagger$ & 100% & full & 34.25 & 1.00 {\scriptsize[1.00, 1.00]} & 1.00 {\scriptsize[1.00, 1.00]} & A \\
-DocVQA$^\dagger$ & 100% & 4 & 22.72 & 1.00 {\scriptsize[0.97, 1.02]} & 0.99 {\scriptsize[0.99, 1.00]} & B \\
-DocVQA$^\dagger$ & 50% & full & 26.78 & 0.69 {\scriptsize[0.62, 0.76]} & 0.80 {\scriptsize[0.76, 0.83]} & C \\
-DocVQA$^\dagger$ & 50% & 4 & 20.85 & 0.66 {\scriptsize[0.59, 0.73]} & 0.79 {\scriptsize[0.75, 0.83]} & B \\
-DocVQA$^\dagger$ & 25% & full & 23.05 & 0.31 {\scriptsize[0.24, 0.38]} & 0.44 {\scriptsize[0.38, 0.51]} & B \\
-DocVQA$^\dagger$ & 25% & 4 & 19.92 & 0.29 {\scriptsize[0.23, 0.37]} & 0.43 {\scriptsize[0.37, 0.50]} & D \\
+DocVQA$^\dagger$ & 100\% & full & 34.25 & 1.00 {\scriptsize[1.00, 1.00]} & 1.00 {\scriptsize[1.00, 1.00]} & A \\
+DocVQA$^\dagger$ & 100\% & 4 & 22.72 & 1.00 {\scriptsize[0.97, 1.02]} & 0.99 {\scriptsize[0.99, 1.00]} & B \\
+DocVQA$^\dagger$ & 50\% & full & 26.78 & 0.69 {\scriptsize[0.62, 0.76]} & 0.80 {\scriptsize[0.76, 0.83]} & C \\
+DocVQA$^\dagger$ & 50\% & 4 & 20.85 & 0.66 {\scriptsize[0.59, 0.73]} & 0.79 {\scriptsize[0.75, 0.83]} & B \\
+DocVQA$^\dagger$ & 25\% & full & 23.05 & 0.31 {\scriptsize[0.24, 0.38]} & 0.44 {\scriptsize[0.38, 0.51]} & B \\
+DocVQA$^\dagger$ & 25\% & 4 & 19.92 & 0.29 {\scriptsize[0.23, 0.37]} & 0.43 {\scriptsize[0.37, 0.50]} & D \\
 \midrule
-ChartQA & 100% & full & 24.64 & 1.00 {\scriptsize[1.00, 1.00]} & 1.00 {\scriptsize[1.00, 1.00]} & A \\
-ChartQA & 100% & 4 & 20.32 & 1.00 {\scriptsize[0.96, 1.04]} & 0.99 {\scriptsize[0.99, 1.00]} & B \\
-ChartQA & 50% & full & 22.00 & 0.71 {\scriptsize[0.62, 0.80]} & 0.74 {\scriptsize[0.69, 0.79]} & B \\
-ChartQA & 50% & 4 & 19.66 & 0.67 {\scriptsize[0.59, 0.76]} & 0.73 {\scriptsize[0.67, 0.78]} & B \\
-ChartQA & 25% & full & 20.69 & 0.35 {\scriptsize[0.25, 0.44]} & 0.41 {\scriptsize[0.30, 0.49]} & B \\
-ChartQA & 25% & 4 & 19.33 & 0.36 {\scriptsize[0.26, 0.45]} & 0.41 {\scriptsize[0.30, 0.49]} & B \\
+ChartQA & 100\% & full & 24.64 & 1.00 {\scriptsize[1.00, 1.00]} & 1.00 {\scriptsize[1.00, 1.00]} & A \\
+ChartQA & 100\% & 4 & 20.32 & 1.00 {\scriptsize[0.96, 1.04]} & 0.99 {\scriptsize[0.99, 1.00]} & B \\
+ChartQA & 50\% & full & 22.00 & 0.71 {\scriptsize[0.62, 0.80]} & 0.74 {\scriptsize[0.69, 0.79]} & B \\
+ChartQA & 50\% & 4 & 19.66 & 0.67 {\scriptsize[0.59, 0.76]} & 0.73 {\scriptsize[0.67, 0.78]} & B \\
+ChartQA & 25\% & full & 20.69 & 0.35 {\scriptsize[0.25, 0.44]} & 0.41 {\scriptsize[0.30, 0.49]} & B \\
+ChartQA & 25\% & 4 & 19.33 & 0.36 {\scriptsize[0.26, 0.45]} & 0.41 {\scriptsize[0.30, 0.49]} & B \\
 \midrule
-TextVQA & 100% & full & 28.43 & 1.00 {\scriptsize[1.00, 1.00]} & 1.00 {\scriptsize[1.00, 1.00]} & A \\
-TextVQA & 100% & 4 & 21.26 & 0.99 {\scriptsize[0.97, 1.01]} & 1.00 {\scriptsize[0.99, 1.00]} & B \\
-TextVQA & 50% & full & 23.85 & 0.73 {\scriptsize[0.65, 0.82]} & 0.75 {\scriptsize[0.71, 0.79]} & C \\
-TextVQA & 50% & 4 & 20.12 & 0.71 {\scriptsize[0.63, 0.80]} & 0.75 {\scriptsize[0.70, 0.78]} & B \\
-TextVQA & 25% & full & 21.57 & 0.48 {\scriptsize[0.38, 0.57]} & 0.51 {\scriptsize[0.44, 0.57]} & B \\
-TextVQA & 25% & 4 & 19.55 & 0.47 {\scriptsize[0.38, 0.57]} & 0.50 {\scriptsize[0.43, 0.56]} & B \\
+TextVQA & 100\% & full & 28.43 & 1.00 {\scriptsize[1.00, 1.00]} & 1.00 {\scriptsize[1.00, 1.00]} & A \\
+TextVQA & 100\% & 4 & 21.26 & 0.99 {\scriptsize[0.97, 1.01]} & 1.00 {\scriptsize[0.99, 1.00]} & B \\
+TextVQA & 50\% & full & 23.85 & 0.73 {\scriptsize[0.65, 0.82]} & 0.75 {\scriptsize[0.71, 0.79]} & C \\
+TextVQA & 50\% & 4 & 20.12 & 0.71 {\scriptsize[0.63, 0.80]} & 0.75 {\scriptsize[0.70, 0.78]} & B \\
+TextVQA & 25\% & full & 21.57 & 0.48 {\scriptsize[0.38, 0.57]} & 0.51 {\scriptsize[0.44, 0.57]} & B \\
+TextVQA & 25\% & 4 & 19.55 & 0.47 {\scriptsize[0.38, 0.57]} & 0.50 {\scriptsize[0.43, 0.56]} & B \\
 \midrule
-POPE$^\dagger$ & 100% & full & 22.58 & 1.00 {\scriptsize[1.00, 1.00]} & 1.00 {\scriptsize[1.00, 1.00]} & A \\
-POPE$^\dagger$ & 100% & 4 & 19.80 & 0.98 {\scriptsize[0.95, 1.02]} & 1.00 {\scriptsize[1.00, 1.01]} & B \\
-POPE$^\dagger$ & 50% & full & 20.93 & 0.93 {\scriptsize[0.87, 1.00]} & 0.34 {\scriptsize[0.28, 0.40]} & A \\
-POPE$^\dagger$ & 50% & 4 & 19.39 & 0.94 {\scriptsize[0.88, 1.02]} & 0.34 {\scriptsize[0.28, 0.40]} & B \\
-POPE$^\dagger$ & 25% & full & 20.11 & 0.90 {\scriptsize[0.80, 1.00]} & 0.24 {\scriptsize[0.18, 0.31]} & B \\
-POPE$^\dagger$ & 25% & 4 & 19.18 & 0.88 {\scriptsize[0.78, 0.98]} & 0.24 {\scriptsize[0.18, 0.31]} & B \\
+POPE$^\dagger$ & 100\% & full & 22.58 & 1.00 {\scriptsize[1.00, 1.00]} & 1.00 {\scriptsize[1.00, 1.00]} & A \\
+POPE$^\dagger$ & 100\% & 4 & 19.80 & 0.98 {\scriptsize[0.95, 1.02]} & 1.00 {\scriptsize[1.00, 1.01]} & B \\
+POPE$^\dagger$ & 50\% & full & 20.93 & 0.93 {\scriptsize[0.87, 1.00]} & 0.34 {\scriptsize[0.28, 0.40]} & A \\
+POPE$^\dagger$ & 50\% & 4 & 19.39 & 0.94 {\scriptsize[0.88, 1.02]} & 0.34 {\scriptsize[0.28, 0.40]} & B \\
+POPE$^\dagger$ & 25\% & full & 20.11 & 0.90 {\scriptsize[0.80, 1.00]} & 0.24 {\scriptsize[0.18, 0.31]} & B \\
+POPE$^\dagger$ & 25\% & 4 & 19.18 & 0.88 {\scriptsize[0.78, 0.98]} & 0.24 {\scriptsize[0.18, 0.31]} & B \\
 \bottomrule
 \end{tabular}

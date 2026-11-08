@@ -29,14 +29,15 @@ def main(argv=None):
     if not any(idx.retained(args.model, t, c, m) for t in TASKS for c in TABLE2_ROWS for m in ("acc", "nll")):
         print(f"no retained values for {args.model} yet; no figure")
         return
-    fig, axes = plt.subplots(1, len(TASKS), figsize=(4 * len(TASKS), 5), sharey=True)
+    fig, axes = plt.subplots(2, 2, figsize=(8, 9), sharey=True)
+    axes = axes.ravel()
     handles = {}
     for ax, t in zip(axes, TASKS):
         ys, labels = [], []
         for i, c in enumerate(TABLE2_ROWS):
             labels.append(_cond_name(c))
-            for metric, dy, style in (("acc", -0.17, dict(fmt="o", color="#222")),
-                                      ("nll", 0.17, dict(fmt="o", color="#888", mfc="white"))):
+            for metric, dy, style in (("acc", -0.17, dict(fmt="o", color="#2a78d6")),
+                                      ("nll", 0.17, dict(fmt="o", color="#52514e", mfc="white"))):
                 ci = idx.retained(args.model, t, c, metric)
                 if ci is None:
                     continue

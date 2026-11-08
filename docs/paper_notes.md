@@ -62,7 +62,7 @@
 - Colab에서 fla 커널 경로를 타지 않았음 확인, torch/transformers 버전(결과 줄 meta).
 - 지식 차단 연구 3편(Kaduri, Zhang, Neo) 각 한 문장 요약은 본문 확인 후.
 
-## 제목 (결과 후 확정)
+## 제목 (결과 후 확정) — D-34에서 후보 A로 확정
 현재 제목 "The Image Lives in Two Memories: Visual Information in Hybrid Linear-Attention Vision-Language Models"는 결과 전에 결론을 단정하고 부제가 길다. 결과를 보고 확정한다. 후보:
 - A. Where Does the Image Live? KV Cache and Recurrent State in Hybrid Vision-Language Models
 - B. Two Memories of an Image: KV Cache and Recurrent State in Hybrid Vision-Language Models

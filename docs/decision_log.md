@@ -146,3 +146,9 @@ whole-scope EF의 잔차 공유 문제(paper_notes)는 이 태그에서 고치�
 - `run_all.sh`에 `--phases`, `--models`, `--limit` 추가. 인자가 없으면 이전과 같다(phase 1–5, 4B·9B 표).
 - D-32의 "4B는 v2에서"를 번복한다(삭제하지 않음). 논문에는 0.8B 본 결과와 별도로 4B 확인 절을 둔다. 100샘플이라 CI가 넓다는 점을 명시한다.
 - 이 변경은 맥 0.8B 실행 중에 별도 worktree(`../twomem_core4b`, 브랜치 core4b)에서 만들었다. 맥 결과 줄에 -dirty가 찍히지 않게 하려는 것이다. 맥 실행이 끝난 뒤 main에 fast-forward로 합친다.
+
+### D-34. 제목 확정과 결과 절 작성 — 확정 (사용자 요청 "결과 기반으로 제목·그림 수정", 2026-11-09)
+- 제목: "Where Does the Image Live? KV Cache and Recurrent State in Hybrid Vision-Language Models" (paper_notes 후보 A). 결론형(D, "Lives in the KV Cache")은 택하지 않았다. phase 5에서 state·conv cache를 함께 지우면 KV만으로는 0.33–0.69만 남아 "KV에만 있다"는 단정이 결과보다 강하기 때문이다.
+- 결과 절(§6.1–6.6), Discussion, Conclusion, Abstract, Contributions를 `results/mac` 표 수치로 채웠다. 4B 확인(§6.4)과 그 한 문장(Abstract·Contributions·Conclusion)은 TBD.
+- 새 그림: `analysis/paper_figures.py`(fig_tokens_bits, fig_channels, fig_case). 색은 dataviz 기준 팔레트 1–4번(검증 통과, aqua·yellow는 대비 경고라 산점도에서 모양으로 함께 구분).
+- conv cache 효과의 해석은 열어 둔다: 내용 전달인지, 지웠을 때 GDN 입력이 흔들리는 효과인지 이 개입들로는 구분하지 못한다(Limitations viii).

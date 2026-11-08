@@ -32,7 +32,8 @@ TABLE2_ROWS = [
     Condition(kv="4"), Condition(kv="noise"), Condition(kv="zero"),
     Condition(state="8"), Condition(state="8ef"), Condition(state="6"), Condition(state="6ef"),
     Condition(state="noise"), Condition(state="zero"), Condition(kv="zero", state="zero"),
-    Condition(kv="4", state="8"), Condition(kv="4", state="8ef"),
+    Condition(kv="4", state="8"), Condition(kv="4", state="8ef"), Condition(kv="4", state="6"),
+    Condition(kv="4", state="6ef"),
     Condition(kv="4", state="8", scope="whole"), Condition(kv="4", state="8ef", scope="whole"),
     Condition(kv="drop"), Condition(state="zeroconv"), Condition(kv="drop", state="zeroconv"),
 ]
@@ -158,7 +159,7 @@ def table3(idx: Index, model: str) -> tuple[str, str]:
 def table5(idx: Index, model: str) -> tuple[str, str]:
     head = ["task", "tokens", "KV bits", "total MB", "acc retained [95% CI]", "loss retained [95% CI]", "MB group"]
     md = ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
-    tex = ["\\begin{tabular}{llcccc c}", "\\toprule", " & ".join(head) + " \\\\", "\\midrule"]
+    tex = ["\\begin{tabular}{llcccc c}", "\\toprule", " & ".join(head).replace("%", "\\%") + " \\\\", "\\midrule"]
     for t in TASKS:
         entries = []
         for keep, method in TABLE5_TOKENS:
@@ -172,7 +173,7 @@ def table5(idx: Index, model: str) -> tuple[str, str]:
             mbs = "n/e" if mbv is None else f"{mbv:.2f}"
             row = [name, f"{int(keep * 100)}%", kv, mbs, _fmt(ca), _fmt(cn), g]
             md.append("| " + " | ".join(row) + " |")
-            tex.append(" & ".join([name.replace("\u2020", "$^\\dagger$")] + row[1:4]
+            tex.append(" & ".join([name.replace("\u2020", "$^\\dagger$"), row[1].replace("%", "\\%")] + row[2:4]
                                   + [_fmt(ca, True), _fmt(cn, True), g]) + " \\\\")
         tex.append("\\midrule")
     tex[-1] = "\\bottomrule"

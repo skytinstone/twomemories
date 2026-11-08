@@ -69,7 +69,8 @@ def subset_id_of(task: str) -> str:
 
 def cell_hash(model_id: str, task: str, cond: quant.Condition | None, sub_id: str, max_pixels: int | None) -> str:
     key = {"model_id": model_id, "task": task, "cond": cond.to_dict() if cond else BLIND, "subset_id": sub_id,
-           "max_pixels": max_pixels, "prompt": data.PROMPTS[task], "max_new_tokens": MAX_NEW_TOKENS}
+           "max_pixels": max_pixels, "prompt": data.PROMPTS[task], "max_new_tokens": MAX_NEW_TOKENS,
+           "thinking": False}
     return hashlib.sha1(json.dumps(key, sort_keys=True).encode()).hexdigest()[:12]
 
 

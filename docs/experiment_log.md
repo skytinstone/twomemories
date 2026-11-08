@@ -44,3 +44,16 @@ run_all.sh 이어하기 시뮬레이션 중 임시 clone이 실패한 채 명령
 ## 2026-11-07 로컬 phase 5 점검 (0.8B, MPS, 검증용, 논문 미사용)
 
 `python scripts/run_phase.py --phase phase5_channels --model Qwen/Qwen3.5-0.8B --limit 5 --out results/local`: 12셀 신규, full·blind 8셀 skip. 5샘플 retained(참고만): KV drop ≈ KV zero(DocVQA 0.14 대 0.13, TextVQA 0.31 대 0.32), state zeroconv는 state zero와 비슷하거나 약간 높음, drop+zeroconv는 DocVQA −0.10, TextVQA 0.02(0 근처). ChartQA는 CI가 너무 넓어 판단 불가.
+
+## 2026-11-07~08 Colab 본 실험 v0.2-main (phase 1–4 완료) — **전부 무효**
+
+| 항목 | 값 |
+|---|---|
+| 범위 | 4B phase 1–3, 9B phase 4. 결과는 원격 브랜치 `results/v0.2-main`(2aae6af)에 보관, main에는 병합하지 않음 |
+| 유닛(compute_log, 행 seconds 기준) | preflight 1.6, phase1 36.4, phase2 20.0, phase3 14.4, phase4 18.8, 합 91.3. 실제 청구량은 리소스 패널로 확인 필요(UNVERIFIED) |
+| 증상 | 모든 셀(full 포함) 정확도 0.000. pred가 전부 "The user wants to …" 같은 생각 문장. gold NLL 토큰 평균 7.2–24.9(로컬 0.8B full은 0.002–0.9) |
+| 원인 | Qwen3.5 4B/9B chat template은 `enable_thinking`이 없으면 thinking이 기본이라 생성 프롬프트가 `<think>\n`으로 끝난다. 0.8B template은 반대로 non-thinking이 기본(`<think>\n\n</think>\n\n`). `_encode`가 `enable_thinking`을 넘기지 않아 4B/9B는 열린 생각 블록 바로 뒤에서 정답 NLL을 재고 decode했다. 4B/9B 프로세서로 프롬프트 끝을 디코드해 확인 |
+| 놓친 이유 | 로컬 검증은 0.8B만 썼고, Colab preflight 2차 점검은 속도·VRAM·셀 수만 봤다(정확도 미확인). run_all이 phase를 자동으로 이어 돌아 phase별 수동 확인(CLAUDE.md)도 없었다 |
+| 조치 | D-29 |
+
+v0.3-channels(phase 5)도 같은 버그가 있으므로 돌리지 않는다.

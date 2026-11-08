@@ -104,3 +104,14 @@ v0.1.1-preflight 이후 변경(이어하기, 모니터, phase별 표·그림, �
 ### D-28. 태그 `v0.3-channels` — 확정
 phase 5와 위 코드를 담는다. 노트북 셀 2·3과 setup 기본 ref를 v0.3-channels로 바꿨다. **v0.2-main 실행이 phase 4까지 끝난 뒤에만** 갈아탄다. 실행 중에 셀 2·3을 다시 돌리면 다음 phase부터 다른 코드가 돈다. 갈아탄 뒤에는 phase 1–4가 모델 로드 없이 skip되고 phase 5만 돈다. 결과 브랜치는 `results/v0.3-channels`.
 whole-scope EF의 잔차 공유 문제(paper_notes)는 이 태그에서 고치지 않았다. 고치면 해당 셀의 pred가 달라지는데 cell_hash가 같아 resume이 섞이므로, 고칠 때는 조건 이름을 바꾸거나 재실행 절차를 함께 정해야 한다.
+
+## 2026-11-08 세션 4 (본 실험 무효 판정)
+
+### D-29. thinking 끄기, 결과 디렉터리 교체, 태그 `v0.4-nothink` — 확정 (재실행은 사용자 승인 대기)
+근거: experiment_log 2026-11-07~08. v0.2-main 결과 전체 무효.
+- `model._encode`: `apply_chat_template(..., enable_thinking=False)`. 프롬프트 끝이 열린 `<think>`이면 ValueError. 0.8B 프롬프트는 바뀌지 않는다(디코드로 확인).
+- `cell_hash` 키에 `"thinking": False` 추가. 무효 셀로 resume되는 일이 없게 모든 해시가 바뀐다.
+- Colab 결과 디렉터리 `MyDrive/twomemories/results` → `results_v2`. cell_path가 조건 이름 기준이라 같은 파일에 새 줄이 섞이면 표가 sample_id로 중복 제거할 때 옛 줄을 고를 수 있어서다. 옛 디렉터리는 지우지 않는다.
+- `run_phase.py` sanity gate: 각 태스크의 full 셀이 끝나면 정확도가 0.1 미만일 때 exit 3으로 멈춘다(run_all 체인도 멈춤).
+- 테스트: 0.8B 프로세서에 4B chat template을 씌워 프롬프트가 `<think>\n\n</think>\n\n`으로 끝나는지 확인. 수정 전 코드에서 실패, 수정 후 통과.
+- 태그 v0.4-nothink는 phase 1–5를 모두 담는다(v0.3-channels 대체). 노트북 셀 2·3과 setup 기본 ref 변경.

@@ -308,3 +308,18 @@ def test_state_zeroconv_clears_conv_cache(model, enc):
         from transformers.cache_utils import LinearAttentionCacheLayerMixin
         gdn = [l for l in s2.cache.layers if isinstance(l, LinearAttentionCacheLayerMixin)]
         assert all(l.recurrent_states[0].abs().max() == 0 and l.conv_states[0].abs().max() == 0 for l in gdn)
+
+
+def test_prompt_never_opens_thinking(model):
+    """4B/9B templates default to thinking; encode must close the block like the 0.8B default does."""
+    import copy
+
+    from huggingface_hub import hf_hub_download
+    from transformers import AutoProcessor
+
+    proc = copy.deepcopy(AutoProcessor.from_pretrained(PROC_ID))
+    proc.chat_template = Path(hf_hub_download("Qwen/Qwen3.5-4B", "chat_template.jinja")).read_text()
+    img = Image.new("RGB", (64, 64), "white")
+    for e in (encode(proc, img, "Q?", img_tok=image_token_id(model), merge=2),
+              encode_blind(proc, "Q?", img_tok=image_token_id(model), merge=2)):
+        assert proc.tokenizer.decode(e.input_ids[0, -6:]).endswith("<think>\n\n</think>\n\n")

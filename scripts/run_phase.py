@@ -16,6 +16,7 @@ from twomem.quant import Condition
 from twomem.runner import COMPUTE_LOG, REPO, RESULTS, cell_done, gpu_name, read_jsonl, run_blind, run_cell
 
 CONFIGS = REPO / "configs"
+MIN_FULL_SCORE = 0.1   # unaltered accuracy below this stops the phase (exit 3): broken prompt or scoring
 
 
 def load_conditions(phase: str, cond_set: str | None = None) -> tuple[dict, list[Condition]]:
@@ -109,6 +110,13 @@ def main(argv=None):
                 res = run_cell(model_id, task, cond, None, args.limit, out, **kw)
             print(f"{model_id} {task} {'blind' if cond is None else cond.label()}: new={res['n_new']} "
                   f"skipped={res['n_skipped']} sec={res['seconds']:.1f}", flush=True)
+            if cond == Condition():
+                rows = [r for r in read_jsonl(Path(res["path"])) if r.get("cell_hash") == res["cell_hash"]]
+                acc = sum(r["score"] for r in rows) / max(1, len(rows))
+                if acc < MIN_FULL_SCORE:
+                    print(f"STOP: {model_id} {task} unaltered accuracy {acc:.3f} < {MIN_FULL_SCORE} "
+                          f"(prompt or scoring is broken; check pred in {res['path']})")
+                    return 3
         del model
     return 0
 

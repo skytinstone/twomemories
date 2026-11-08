@@ -82,11 +82,16 @@ def _span_from_mask(mask: torch.Tensor) -> tuple[int, int] | None:
 
 
 def _encode(processor, msgs, img_tok: int, merge: int) -> Encoded:
+    # Qwen3.5 4B/9B templates default to thinking (prompt ends in an open "<think>"), 0.8B to non-thinking.
+    # Answers are read right after the prompt, so thinking is always off.
     out = processor.apply_chat_template(msgs, tokenize=True, add_generation_prompt=True, return_dict=True,
-                                        return_tensors="pt")
+                                        return_tensors="pt", enable_thinking=False)
     ids = out["input_ids"]
     if ids.shape[0] != 1:
         raise ValueError("encode handles one sample at a time")
+    tail = processor.tokenizer.decode(ids[0, -8:])
+    if tail.rstrip().endswith("<think>"):
+        raise ValueError(f"prompt ends in an open <think> block: {tail!r}")
     span = _span_from_mask(ids[0] == img_tok)
     n_vis = 0 if span is None else span[1] - span[0]
     grid = out.get("image_grid_thw")

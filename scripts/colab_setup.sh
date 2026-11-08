@@ -13,14 +13,14 @@ set -euo pipefail
 OWNER=skytinstone
 DRIVE=/content/drive/MyDrive/twomemories
 WORK=/content
-REF=${TWOMEM_REF:-v0.3-channels}
+REF=${TWOMEM_REF:-v0.4-nothink}
 HF_LOCAL=/content/hf_cache
 
 if [ ! -d /content/drive/MyDrive ]; then
   echo "Drive is not mounted (run drive.mount('/content/drive') first)" >&2
   exit 1
 fi
-mkdir -p "$HF_LOCAL" "$DRIVE/results"
+mkdir -p "$HF_LOCAL" "$DRIVE/results_v2"
 
 clone() {  # name -> /content/name; the token is used for the fetch only and not stored in .git/config
   local name=$1
@@ -39,8 +39,8 @@ git -C "$WORK/twomemories" checkout -q "$REF"
 # Seed Drive results with the repo's tracked results (never overwrite what Drive already has),
 # then bring Drive's results back into the checkout so resume and git see the same files.
 cd "$WORK/twomemories"
-rsync -a --ignore-existing results/ "$DRIVE/results/"
-rsync -a "$DRIVE/results/" results/
+rsync -a --ignore-existing results/ "$DRIVE/results_v2/"
+rsync -a "$DRIVE/results_v2/" results/
 git config user.name "twomem-colab"
 git config user.email "horcruxtech.ai@gmail.com"
 
@@ -50,7 +50,7 @@ pip install -q -e "$WORK/hybridquant" -e "$WORK/twomemories"
 # (see hybridquant.check_hook_coverage and docs/assumptions.md, premise 3).
 cat > /content/twomem_env.sh <<EOF
 export HF_HOME=$HF_LOCAL
-export TWOMEM_RESULTS=$DRIVE/results
+export TWOMEM_RESULTS=$DRIVE/results_v2
 export USE_HUB_KERNELS=NO
 export TOKENIZERS_PARALLELISM=false
 EOF

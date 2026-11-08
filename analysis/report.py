@@ -32,7 +32,8 @@ def render(phase: str | None, model: str, allow_local: bool, results: Path = REP
     comp = compute_summary(results / "compute_log.jsonl", phase)
     out = [f"# 단계 보고 / Phase report: {phase or 'all'} ({model})", ""]
     if allow_local:
-        out += ["> 로컬 검증 수치 포함, 논문 미사용. / Includes local check numbers; not for the paper.", ""]
+        out += ["> mps/cpu 줄 포함: 맥 본 실험(results/mac, D-30)이면 논문용, results/local preflight가 섞였으면 검증용. / "
+            "Includes mps/cpu rows: paper numbers only if --results is results/mac (D-30).", ""]
     out += ["## 컴퓨팅 / Compute", "", "| GPU | cells | samples | sec | sec/sample | units (est.) | peak VRAM GB |",
             "|---|---|---|---|---|---|---|"]
     for gpu, g in comp.items():

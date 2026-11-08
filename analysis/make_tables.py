@@ -212,14 +212,14 @@ def main(argv=None):
     idx = Index(load_rows(Path(args.results), args.allow_local))
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    note = ("> LOCAL CHECK (mps/cpu rows included). Not for the paper.\n\n" if args.allow_local else "")
+    note = (f"> mps/cpu rows included (results={args.results}); paper numbers only from results/mac (D-30).\n\n" if args.allow_local else "")
     tables = (("table2", lambda i, m: table2(i, m, "acc")), ("table2nll", lambda i, m: table2(i, m, "nll")),
               ("table3", table3), ("table5", table5))
     for name, fn in tables:
         md, tex = fn(idx, args.model)
         foot = f"\n\n{NLL_NOTE}" if name in ("table2nll", "table5") else ""
         (out / f"{name}.md").write_text(f"{note}**{name}** model={args.model}\n\n{md}{foot}\n")
-        (out / f"{name}.tex").write_text(("% LOCAL CHECK, not for the paper\n" if args.allow_local else "") + tex + "\n")
+        (out / f"{name}.tex").write_text((f"% mps/cpu rows included (results={args.results}); paper numbers only from results/mac (D-30)\n" if args.allow_local else "") + tex + "\n")
         print(f"== {name} ({args.model})\n{md}\n")
     return 0
 

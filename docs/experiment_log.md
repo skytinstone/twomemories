@@ -57,3 +57,9 @@ run_all.sh 이어하기 시뮬레이션 중 임시 clone이 실패한 채 명령
 | 조치 | D-29 |
 
 v0.3-channels(phase 5)도 같은 버그가 있으므로 돌리지 않는다.
+
+## 2026-11-09 맥 0.8B 본 실험 완료와 두 단계 확인
+
+- phase 1, 2, 3, 5 (`results/mac`): 104셀 전부 완료(태스크당 25조건 + blind, 200/200/200/300샘플). 로그 4개 모두 exit=0, `-dirty` 줄 0. phase 2–5 약 2.5시간(23:50–02:20).
+- 두 단계 vs 단일 패스(`scripts/check_twostage.py`, 태스크당 처음 50샘플, `results/checks/twostage_0.8B.jsonl`): 평균 NLL/토큰 차이(single − two-stage) DocVQA −0.0040, ChartQA −0.0013, TextVQA +0.0071, POPE −0.0070. blind–full 차이 대비 0.07–0.21%. 샘플별 최대 |차이| 0.15–0.32(bf16 분할 반올림). D-32의 UNVERIFIED 해소.
+- Colab core4b(D-33): 5샘플 점검 통과(full > blind 4태스크, 짧은 답, 0.63 s/샘플, 9.3 GB, 0.22유닛). 100샘플 실행 중.

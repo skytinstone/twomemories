@@ -53,8 +53,6 @@ def main(argv=None):
     axes[0].invert_yaxis()
     names = {"acc": "accuracy retained", "nll": "loss retained"}
     fig.legend([handles[m] for m in handles], [names[m] for m in handles], loc="lower center", ncol=2, fontsize=9)
-    if args.allow_local:
-        fig.suptitle("LOCAL CHECK, not for the paper")
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.out)

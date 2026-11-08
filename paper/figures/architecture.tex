@@ -1,6 +1,6 @@
 % Figure 1: Qwen3.5 hybrid block stack, its two inference memories and the intervention points.
 % Drawn in the style of an architecture diagram (stacked sublayers, residual paths, repeat counts).
-% Structure from the model code: pre-norm layers, dense MLP; 4B/9B: 8 x (3 GDN + 1 gated attention).
+% Structure from the model code: pre-norm layers, dense MLP; 0.8B: 6 x (3 GDN + 1 gated attention).
 \begin{tikzpicture}[
   font=\small, >={Stealth[length=4pt]}, line width=0.6pt,
   blk/.style={draw=black!70, rounded corners=3pt, minimum width=3.0cm, minimum height=0.62cm, align=center},
@@ -47,7 +47,7 @@
 \node[add] (a2) at (0,4.09) {$+$};
 % gated attention layer (once)
 \node[nrm] (n3) at (0,5.05) {RMSNorm};
-\node[att] (att) at (0,5.75) {Gated Attention\\[-1pt]{\scriptsize 16 query / 4 KV heads}};
+\node[att] (att) at (0,5.75) {Gated Attention\\[-1pt]{\scriptsize 8 query / 2 KV heads}};
 \node[add] (a3) at (0,6.47) {$+$};
 \node[nrm] (n4) at (0,7.00) {RMSNorm};
 \node[ffn] (f2) at (0,7.67) {Feed Forward};
@@ -78,12 +78,12 @@
   \draw[black!55, fill=white, rounded corners=6pt, dash pattern=on 2pt off 1.5pt] (r3l) rectangle (r3r);
 \end{scope}
 \node[anchor=east, font=\normalsize] at ($(r3l)!0.5!(r3l|-r3r)+(-0.3,0)$) {$3\times$};
-\node[anchor=east, font=\normalsize] at ($(r8l|-n3)+(-0.1,0.35)$) {$8\times$};
+\node[anchor=east, font=\normalsize] at ($(r8l|-n3)+(-0.1,0.35)$) {$6\times$};
 
 % ---------------- memories beside the mixers
 \node[mem, anchor=west, text width=4.3cm] (state) at ($(gdn.east)+(1.55,0)$)
   {\textbf{Recurrent state} (each GDN layer)\\
-   $S^{\ell}\in\mathbb{R}^{32\times128\times128}$, fp32, 50.3\,MB\\
+   $S^{\ell}\in\mathbb{R}^{16\times128\times128}$, fp32, 18.9\,MB\\
    + conv cache (last 3 inputs)\\
    fixed size, updated by every token};
 \draw[<->] (gdn.east) -- (state.west) node[midway, above, font=\scriptsize] {read/write};
@@ -104,7 +104,7 @@
   \fi\fi
 }
 \node[anchor=south west, font=\scriptsize, align=left] at ($(kv.south west)+(0.04,0.04)$)
-  {one row per token: prefix $P$, \textcolor{viscol}{visual rows $\mathcal{V}$}\\(32.8\,kB each); $Q$ added in stage 2};
+  {one row per token: prefix $P$, \textcolor{viscol}{visual rows $\mathcal{V}$}\\(12.3\,kB each); $Q$ added in stage 2};
 \draw[<->] (att.east) -- (att.east -| kv.west) node[midway, above, font=\scriptsize] {append/read};
 \node[cut, fit=(kv), inner sep=3pt] (fcut) {};
 \node[anchor=north west, text=cutc, font=\footnotesize] at (fcut.south west)

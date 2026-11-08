@@ -129,3 +129,11 @@ whole-scope EF의 잔차 공유 문제(paper_notes)는 이 태그에서 고치�
 - 주 지표: 정확도 retained = (acc_c − acc_blind)/(acc_full − acc_blind), 데이터셋 수준, CI는 같은 대응 부트스트랩. NLL retained는 함께 보고하되 POPE·DocVQA는 대소문자 혼입을 표에 명시한다.
 - 검토했으나 택하지 않은 안: 대소문자 변형 확률을 합친 NLL로 고쳐 phase 1부터 재실행(맥 3.5–4.5 h).
 - 정확도 retained는 분모(acc_full − acc_blind)가 작으면 불안정하다(POPE 0.41이 가장 작음). analysis에 추가 예정.
+
+## 2026-11-09 세션 5 (논문 0.8B 전환)
+
+### D-32. preprint 범위와 남은 확인 — 확정 (사용자 승인, 2026-11-09 01:00)
+- 규모(§5.4 Scale) 절은 지운다. 4B·9B는 Limitations (v)·(vii)에 향후 과제로만 적는다. Colab 4B 핵심 확인(약 10–12유닛)은 다른 실험 뒤 유닛이 남으면 v2에서 따로 정한다.
+- 두 단계 vs 단일 prefill 확인: L1(합성 이미지 1장) 수치를 쓰지 않고, 맥 본 실험이 끝난 뒤 `scripts/check_twostage.py`로 태스크당 처음 50샘플을 다시 잰다. 단일 패스(stock forward) gold NLL/토큰을 `results/mac`의 KVfull_Sfull_image 줄과 비교해 `results/checks/twostage_0.8B.jsonl`에 쓴다. `results/mac` 밖에 두는 것은 표 Index가 섞지 않게 하려는 것이다. 실행 전이라 UNVERIFIED.
+- 부록에 POPE의 NLL·정확도 불일치(대소문자) 예시를 넣는다(D-31). 그림은 analysis/figures.py에 추가하되, 실행 중 dirty 표시를 피하려고 phase 5가 끝난 뒤 고친다.
+- 논문 본문은 0.8B 기준으로 바꿨다(Fig 1, Table 1, §2–4, 부록 B·C). 정확도 retained $\mathcal{R}$가 주 지표, $\mathcal{R}_{\mathrm{NLL}}$이 보조 지표(§3.3).

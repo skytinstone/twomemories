@@ -152,3 +152,9 @@ whole-scope EF의 잔차 공유 문제(paper_notes)는 이 태그에서 고치�
 - 결과 절(§6.1–6.6), Discussion, Conclusion, Abstract, Contributions를 `results/mac` 표 수치로 채웠다. 4B 확인(§6.4)과 그 한 문장(Abstract·Contributions·Conclusion)은 TBD.
 - 새 그림: `analysis/paper_figures.py`(fig_tokens_bits, fig_channels, fig_case). 색은 dataviz 기준 팔레트 1–4번(검증 통과, aqua·yellow는 대비 경고라 산점도에서 모양으로 함께 구분).
 - conv cache 효과의 해석은 열어 둔다: 내용 전달인지, 지웠을 때 GDN 입력이 흔들리는 효과인지 이 개입들로는 구분하지 못한다(Limitations viii).
+
+### D-35. preprint 공개 준비 — 확정 (사용자 결정, 2026-11-09)
+- 제목: "Locating Visual Information in Hybrid Linear-Attention Vision-Language Models: Training-Free Interventions on the KV Cache, Recurrent State and Convolution Cache"(기술형, D-34의 의문형 제목을 대체). Abstract는 두 단에 걸친 1단.
+- 저장소를 공개로 전환. 전환 전 전체 git 이력에서 토큰·키 패턴을 검사했고 발견 없음. 원격 `results/v0.2-main`(무효 실행)도 함께 공개되며 README와 experiment_log에 무효라고 적었다.
+- vLLM issue #55196 인용 확인(제목·내용이 본문 주장과 일치), refs의 VERIFY 메모 삭제. CalibQuant(arXiv:2502.14882) 인용 추가, attention 기반 pruning과 비교하지 않았다는 점을 §6.3에 명시.
+- preprint는 ResearchGate에 올린다(사용자 결정). arXiv 병행 여부는 사용자 판단.

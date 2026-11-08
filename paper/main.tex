@@ -45,19 +45,18 @@
 \twocolumn[{
 \begin{center}
 \rule{\textwidth}{4pt}\\[0.2in]
-{\fontsize{17}{20}\selectfont\bfseries Where Does the Image Live?\\[2pt]
-KV Cache and Recurrent State in Hybrid Vision-Language Models\par}
+{\fontsize{16}{19.5}\selectfont\bfseries Locating Visual Information in Hybrid Linear-Attention\\[1pt]
+Vision-Language Models: Training-Free Interventions on the\\[1pt]
+KV Cache, Recurrent State and Convolution Cache\par}
 \vspace{0.18in}\rule{\textwidth}{1pt}\\[0.2in]
 \textbf{Minseok Shin}\\
 Horcrux Technologies, Seoul, Republic of Korea\\
 \texttt{horcruxtech.ai@gmail.com}\quad\texttt{stevenshin16@korea.ac.kr}
 \end{center}
-\vspace{0.25in}
-}]
-
+\vspace{0.1in}
 \begin{center}{\large\bfseries Abstract}\end{center}
 \vspace{-0.5ex}
-\begin{list}{}{\leftmargin=0.15in\rightmargin=0.15in}\item[]
+\begin{list}{}{\leftmargin=0.5in\rightmargin=0.5in}\item[]
 Hybrid vision-language models that interleave linear-attention layers with softmax attention read an image into
 two memories at once: the key-value (KV) rows of the visual tokens in the attention layers, and a fixed-size
 recurrent state in the linear-attention layers that has absorbed every visual token. Visual-token pruning and
@@ -78,6 +77,8 @@ form of the answer: zeroing it moves POPE answers from lower to upper case, whic
 retained ratio while accuracy barely changes. A check on Qwen3.5-4B (100 samples per task) agrees: without the
 visual KV rows at most 6\% of the gain is left on reading tasks, and without the state none of it is lost.
 \end{list}
+\vspace{0.25in}
+}]
 
 \section{Introduction}
 
@@ -170,7 +171,9 @@ reduction is reported to act as compression because the state keeps what dropped
 \paragraph{Multimodal KV-cache compression.}
 LOOK-M and VL-Cache compress the KV cache of multimodal inputs with modality-aware eviction and budget allocation
 \citep{wan2024lookm,tu2025vlcache}. KV quantization for text, e.g.\ KIVI \citep{liu2024kivi} and KVQuant
-\citep{hooper2024kvquant}, applies unchanged to the visual rows we quantize.
+\citep{hooper2024kvquant}, applies unchanged to the visual rows we quantize. CalibQuant quantizes the visual KV
+cache of transformer VLMs down to 1 bit and argues that, unlike token dropping, quantization keeps every visual
+token \citep{han2025calibquant}; we test that trade-off at matched cost in a hybrid model.
 
 \paragraph{Where visual information flows.}
 Attention-knockout and patching studies of transformer VLMs trace how image information reaches the answer.
@@ -613,7 +616,9 @@ $\kappa=1,0.5,0.25$ with 16-bit KV, and 4, 2, 1 with 4-bit KV. The equal-memory 
 differ (16 versus 4 bits), which \eqref{eq:mb} charges. Figure~\ref{fig:tokens} shows the whole grid. At 4 bits per
 element per visual token, quantizing keeps $\ret=1.00$, $1.00$, $0.99$ and $0.98$, while deleting three quarters of
 the tokens keeps $0.31$, $0.35$ and $0.48$ on the reading tasks and $0.90$ on POPE. On the reading tasks, deletion loses 0.25--0.4 of the
-gain for every halving of the tokens, at either bit-width (Appendix~\ref{app:results}, Table~\ref{tab:tokens}). Uniform and random deletion at
+gain for every halving of the tokens, at either bit-width (Appendix~\ref{app:results}, Table~\ref{tab:tokens}),
+in line with the case made for visual KV quantization in transformer VLMs \citep{han2025calibquant}. Our deletion is
+uniform or random before the image is read; attention-guided pruning \citep{chen2024fastv} is not compared here. Uniform and random deletion at
 $\kappa=0.5$ agree within their intervals (0.69 against 0.62 on DocVQA, 0.73 against 0.78 on TextVQA). Object
 presence is the exception: POPE keeps 0.88--0.90 at a quarter of the tokens, consistent with POPE keeping half of
 its gain with no visual KV rows at all.
@@ -713,7 +718,7 @@ experiments, analyses and claims were designed, run and verified by the author.
 
 \section*{Reproducibility and Data Availability}
 Code, configurations, subset ids, raw per-sample results and the scripts that regenerate every table and figure
-are at \url{https://github.com/skytinstone/twomemories} \TBD{make public at submission}. Each phase is run by
+are at \url{https://github.com/skytinstone/twomemories}. Each phase is run by
 \texttt{python scripts/run\_phase.py --phase <name>}, the tables by \texttt{python analysis/make\_tables.py} and the
 figures by \texttt{python analysis/figures.py}. Quantization uses the released \texttt{hybridquant} package
 \citep{shin2026hybridquant} unchanged. All datasets are public.

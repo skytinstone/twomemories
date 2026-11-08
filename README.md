@@ -1,10 +1,10 @@
 # twomemories
 
-하이브리드 linear-attention VLM(Qwen3.5)에서 이미지 정보가 KV cache와 recurrent state 중 어디에 저장되는지 training-free 개입으로 재는 실험 코드. 논문: *The Image Lives in Two Memories: Visual Information in Hybrid Linear-Attention VLMs*.
+하이브리드 linear-attention VLM(Qwen3.5)에서 이미지 정보가 KV cache와 recurrent state 중 어디에 저장되는지 training-free 개입으로 재는 실험 코드. 논문: *Locating Visual Information in Hybrid Linear-Attention Vision-Language Models: Training-Free Interventions on the KV Cache, Recurrent State and Convolution Cache* (`paper/main.pdf`).
 
 양자화·노이즈 구현은 [hybridquant](https://github.com/skytinstone/hybridquant)를 패키지로 import한다(복사하지 않음).
 
-> **로컬(맥) 수치는 논문에 쓰지 않는다.** `results/local/`과 `docs/assumptions.md`의 L1 결과는 경로 검증용이다. 논문 수치는 Colab에서 4B 이상으로 돌린 `results/**/*.jsonl`에서만 가져온다.
+> **논문 수치의 출처.** Qwen3.5-0.8B 본 실험은 맥(MPS)에서 전체 subset으로 돌린 `results/mac/`(D-30), 4B 확인은 Colab A100의 `results/colab/`(D-33)이다. `results/local/`과 `docs/assumptions.md`의 L1 결과는 경로 검증용이며 논문에 쓰지 않는다. 원격 브랜치 `results/v0.2-main`은 thinking 템플릿 문제로 무효가 된 실행이다(D-29, `docs/experiment_log.md`).
 
 ## 무엇을 재는가
 
@@ -15,8 +15,18 @@
 - 시각 토큰 {100, 50, 25}% (uniform / random 삭제)
 - 태스크: DocVQA, ChartQA, TextVQA, POPE
 
-지표는 정답 teacher-forced NLL로 만든 데이터셋 수준 비율
-retained = (NLL_blind − NLL_cond) / (NLL_blind − NLL_full)과 대응 부트스트랩 95% CI, 그리고 greedy 답의 태스크 점수.
+주 지표는 greedy 답의 태스크 점수로 만든 데이터셋 수준 비율
+retained = (acc_cond − acc_blind) / (acc_full − acc_blind)와 대응 부트스트랩 95% CI다(D-31). 정답 teacher-forced NLL로 만든 같은 비율을 함께 보고하며, POPE·DocVQA는 정답 대소문자가 섞여 있다고 표시한다.
+
+## 논문 표·그림 재생성
+
+```bash
+python analysis/make_tables.py --model Qwen/Qwen3.5-0.8B --results results/mac --allow-local --out paper/tables/Qwen3.5-0.8B
+python analysis/figures.py --model Qwen/Qwen3.5-0.8B --results results/mac --allow-local --out paper/figures/retained_Qwen3.5-0.8B.pdf
+python analysis/paper_figures.py --allow-local
+python analysis/make_tables.py --model Qwen/Qwen3.5-4B --results results/colab --out paper/tables/Qwen3.5-4B
+python scripts/check_twostage.py   # 두 단계 vs 단일 prefill (results/checks/)
+```
 
 ## 로컬 검증 (맥, MPS)
 

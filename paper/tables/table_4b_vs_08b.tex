@@ -1,0 +1,14 @@
+% generated from results/colab (4B, 100 samples per task) and results/mac (0.8B, full subsets); see D-33
+\begin{tabular}{lcccc}
+\toprule
+condition & DocVQA & ChartQA & TextVQA & POPE \\
+\midrule
+unaltered / blind accuracy & 0.92 / 0.06 & 0.80 / 0.11 & 0.79 / 0.06 & 0.88 / 0.59 \\
+\midrule
+KV $Q_4$ & 1.00 {\scriptsize[1.00, 1.00]} (1.00) & 1.00 {\scriptsize[1.00, 1.00]} (1.00) & 0.99 {\scriptsize[0.97, 1.00]} (0.99) & 1.00 {\scriptsize[1.00, 1.00]} (0.98) \\
+KV zero & 0.05 {\scriptsize[-0.01, 0.11]} (0.02) & 0.06 {\scriptsize[-0.04, 0.14]} (0.02) & 0.06 {\scriptsize[-0.02, 0.14]} (0.07) & 0.41 {\scriptsize[0.21, 0.67]} (0.53) \\
+state $Q_8$ & 1.00 {\scriptsize[1.00, 1.00]} (1.00) & 1.00 {\scriptsize[0.96, 1.04]} (1.00) & 1.00 {\scriptsize[1.00, 1.00]} (0.99) & 1.00 {\scriptsize[1.00, 1.00]} (1.00) \\
+state zero & 1.04 {\scriptsize[1.00, 1.08]} (0.97) & 1.00 {\scriptsize[0.94, 1.06]} (0.66) & 1.02 {\scriptsize[0.97, 1.08]} (0.93) & 1.07 {\scriptsize[0.95, 1.27]} (0.91) \\
+KV $Q_4$ + state $Q_8^{\mathrm{EF}}$ & 1.00 {\scriptsize[1.00, 1.00]} (0.97) & 1.00 {\scriptsize[1.00, 1.00]} (0.99) & 1.01 {\scriptsize[0.99, 1.03]} (0.99) & 1.00 {\scriptsize[1.00, 1.00]} (0.99) \\
+\bottomrule
+\end{tabular}

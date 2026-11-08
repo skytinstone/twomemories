@@ -63,3 +63,10 @@ v0.3-channels(phase 5)도 같은 버그가 있으므로 돌리지 않는다.
 - phase 1, 2, 3, 5 (`results/mac`): 104셀 전부 완료(태스크당 25조건 + blind, 200/200/200/300샘플). 로그 4개 모두 exit=0, `-dirty` 줄 0. phase 2–5 약 2.5시간(23:50–02:20).
 - 두 단계 vs 단일 패스(`scripts/check_twostage.py`, 태스크당 처음 50샘플, `results/checks/twostage_0.8B.jsonl`): 평균 NLL/토큰 차이(single − two-stage) DocVQA −0.0040, ChartQA −0.0013, TextVQA +0.0071, POPE −0.0070. blind–full 차이 대비 0.07–0.21%. 샘플별 최대 |차이| 0.15–0.32(bf16 분할 반올림). D-32의 UNVERIFIED 해소.
 - Colab core4b(D-33): 5샘플 점검 통과(full > blind 4태스크, 짧은 답, 0.63 s/샘플, 9.3 GB, 0.22유닛). 100샘플 실행 중.
+
+## 2026-11-09 Colab 4B 확인(core4b) 완료
+- 결과 브랜치 `results/v0.5-core4b`(ece01ee). 이 브랜치는 맥 결과 이전 커밋(4e78f13)에서 갈라져 통째로 합치면 `results/mac`이 지워지므로, 4B 파일과 compute_log만 `results/colab/`으로 가져왔다.
+- 28셀 × 100샘플, 중복 0, commit 전부 4e78f13(-dirty 없음), GPU A100-SXM4-40GB, 0.58 s/샘플, 추정 4.01유닛(5샘플 점검 포함), 최대 9.2 GB. transformers 5.22.1, torch 2.14.1+cu130.
+- 정확도 full/blind: DocVQA 0.92/0.06, ChartQA 0.80/0.11, TextVQA 0.79/0.06, POPE 0.88/0.59.
+- 정확도 retained: KV zero 0.05/0.06/0.06/0.41, state zero 1.04/1.00/1.02/1.07, KV4·S8·KV4+S8ef ≥ 0.99. 0.8B보다 state가 덜 필요하다(ChartQA 0.66 → 1.00). POPE 대소문자 효과 재현: 원본 대문자 0%, state zero 후 68%.
+- 표: `paper/tables/table_4b_vs_08b.tex`(생성), `paper/tables/Qwen3.5-4B/`. 논문 §6.4와 남은 TBD를 채움.

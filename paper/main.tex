@@ -1,5 +1,5 @@
 % The Image Lives in Two Memories -- draft.
-% Results are placeholders (\TBD) until phases 1, 2, 3 and 5 of Qwen3.5-0.8B are in (results/mac, D-30).
+% Results: Qwen3.5-0.8B from results/mac (D-30), the 4B check from results/colab (D-33).
 % Primary metric: accuracy retained; loss retained reported alongside (D-31).
 % Every number outside \TBD comes from the code, the model configs or docs/assumptions.md.
 \documentclass[10pt,twocolumn]{article}
@@ -75,7 +75,8 @@ cutting the stored cache by 4.6--5.0$\times$, and error feedback adds nothing me
 token, 4-bit KV for every token keeps 98--100\%, while keeping a quarter of the tokens at 16 bits keeps 31--48\% on
 reading tasks. Clearing all three carriers returns the model to its no-image accuracy. Finally, the state shapes the
 form of the answer: zeroing it moves POPE answers from lower to upper case, which flips the sign of a loss-based
-retained ratio while accuracy barely changes. \TBD{one sentence on the 4B check.}
+retained ratio while accuracy barely changes. A check on Qwen3.5-4B (100 samples per task) agrees: without the
+visual KV rows at most 6\% of the gain is left on reading tasks, and without the state none of it is lost.
 \end{list}
 
 \section{Introduction}
@@ -149,7 +150,8 @@ feedback (Section~\ref{sec:res-bits}); at equal KV cost, quantizing every visual
 50--70 points of retained gain on reading tasks (Section~\ref{sec:res-tokens}).
 \item A loss-based retained ratio can invert when an intervention changes the answer's form rather than its content;
 we show this for letter case on POPE and report accuracy as the primary measure (Section~\ref{sec:res-scores}).
-\item \TBD{4B check (Section~\ref{sec:res-scale}).}
+\item At 4B the split is sharper: removing the visual KV rows leaves 5--6\% on reading tasks, and zeroing the state
+(convolution cache kept) leaves the full gain on every task (Section~\ref{sec:res-scale}).
 \end{itemize}
 
 \section{Related Work}
@@ -506,9 +508,12 @@ each.
 
 \section{Experimental Setup}\label{sec:setup}
 \paragraph{Models.} Qwen3.5-0.8B in all phases run (1, 2, 3 and 5), bf16 weights, the post-trained (non-base)
-checkpoint. The planned 9B phase (phase 4) is not run in this version. On the MPS backend neither the fla kernels
+checkpoint, and Qwen3.5-4B for a check of five conditions (Section~\ref{sec:res-scale}). The planned 9B phase
+(phase 4) is not run in this version. On the MPS backend neither the fla kernels
 nor the fused causal convolution are available, so GDN and its convolution run in the library's PyTorch reference
-implementation; transformers 5.22.2 and torch 2.15.0, as recorded in every result row.
+implementation; transformers 5.22.2 and torch 2.15.0, as recorded in every result row. The 4B check ran with
+transformers 5.22.1 and torch 2.14.1 (CUDA 13.0); its rows do not record which GDN kernel was used, but the hook
+counts confirm that every cache write went through the hooked methods.
 
 \paragraph{Data.} Fixed random subsets (seed 0) of DocVQA validation (200) \citep{mathew2021docvqa}, ChartQA test
 (200) \citep{masry2022chartqa}, TextVQA validation (200) \citep{singh2019textvqa} and POPE (300) \citep{li2023pope},
@@ -524,12 +529,14 @@ the state levels alone and with $f=Q_4$, and the two every-write cells (KV4 with
 Phase 3 (tokens versus bits): $\kappa\in\{1,0.5,0.25\}$ uniform, with KV at 16 or 4 bits, and $\kappa=0.5$ random.
 Phase 5 (clean removal): KV drop, state $0_C$, and both. (Phase 4, five conditions on 9B, is not run.) Each condition also has the two anchors per task. Batch size 1 and greedy decoding throughout.
 
-\paragraph{Compute.} One Apple M3 Pro laptop with 18\,GB of unified memory (MPS backend); no cloud GPU. The four
-phases evaluated 23,400 samples in 4.7 hours of summed per-sample time, 0.54--0.81\,s per sample by phase
-(Appendix~\ref{app:compute}).
+\paragraph{Compute.} One Apple M3 Pro laptop with 18\,GB of unified memory (MPS backend) for 0.8B: the four
+phases evaluated 23,400 samples in 4.7 hours of summed per-sample time, 0.54--0.81\,s per sample by phase. The 4B
+check took 2,800 samples at 0.58\,s each on one NVIDIA A100-SXM4-40GB (Google Colab, about 4 compute units, peak
+9.2\,GB of GPU memory; Appendix~\ref{app:compute}).
 
 \section{Results}
-All numbers are from Qwen3.5-0.8B on the full subsets (Section~\ref{sec:setup}). The unaltered and blind accuracies
+All numbers are from Qwen3.5-0.8B on the full subsets (Section~\ref{sec:setup}), except
+Section~\ref{sec:res-scale} (4B). The unaltered and blind accuracies
 are 0.880/0.053 (DocVQA), 0.745/0.100 (ChartQA), 0.726/0.062 (TextVQA) and 0.867/0.463 (POPE), so $\ret$ is
 defined on every task; POPE has the smallest gap (0.40). Figure~\ref{fig:retained} shows both ratios for every
 condition and Table~\ref{tab:main} the accuracy ratio; the loss ratio and the raw scores are in
@@ -621,8 +628,24 @@ bit-width. Dotted: the equal-cost pair (all tokens at 4 bits; a quarter of the t
 \end{figure}
 
 \subsection{Check at 4B}\label{sec:res-scale}
-\TBD{core4b on Qwen3.5-4B (Colab, 100 samples per task): unaltered, KV4, KV zero, state 8, state zero, KV4 with
-$Q_8^{\mathrm{EF}}$; compare the KV zero / state zero split with 0.8B.}
+We repeated five conditions on Qwen3.5-4B on the first 100 samples of each subset, on one A100 (Colab;
+Table~\ref{tab:4b}). The KV rows are again necessary for reading: KV zero leaves $\ret=0.05$, $0.06$ and $0.06$, with
+intervals that include 0, as at 0.8B (0.02--0.07). POPE keeps 0.41 [0.21, 0.67] without them; its unaltered--blind
+gap is only 0.29 at 4B, hence the wide interval. The state is less needed than at 0.8B: zeroing it, with the
+convolution cache left in place, keeps $\ret=1.00$--$1.07$ on every task, including ChartQA, where 0.8B kept only
+0.66, and the loss ratio agrees on the reading tasks (1.00--1.01). 4-bit KV, the 8-bit state and both together are
+lossless ($\ret\ge0.99$). The form effect of Section~\ref{sec:res-scores} recurs: the unaltered 4B model answers
+POPE in lower case throughout, and after state zero 68\% of its answers are capitalised ($\ret_{\NLL}=0.58$ at
+$\ret=1.07$). With 100 samples per task these intervals are wider than at 0.8B, and the state--convolution split
+(phase 5) was not run at 4B.
+
+\begin{table*}[t]
+\centering\small
+\caption{Accuracy retained $\ret$ [95\% CI] on Qwen3.5-4B (first 100 samples per task; A100), with the 0.8B value
+on the full subsets in parentheses. ``State zero'' leaves the convolution cache.}
+\label{tab:4b}
+\input{tables/table_4b_vs_08b.tex}
+\end{table*}
 
 \subsection{Task scores and the loss ratio}\label{sec:res-scores}
 On the three reading tasks accuracy and the loss of the reference order the conditions alike, but not on one
@@ -680,11 +703,12 @@ without the state most of the image's contribution survives, more so when the co
 visual tokens. Object presence is shared more evenly. After reading, both memories tolerate low precision, and
 quantizing every visual token is far better than keeping fewer of them at the same cost. Interventions on the state
 change the form of answers as well as their content, which a loss-based measure confuses with information loss.
-\TBD{one sentence on the 4B check.}
+At 4B the visual KV rows remain necessary for reading and the state becomes dispensable, so the picture sharpens
+rather than changes with scale.
 
 \section*{Acknowledgments}
-This work was carried out by a single author without institutional funding; all experiments ran on the author's
-laptop. The author used Claude (Anthropic) as an assistant for code development and manuscript editing; all
+This work was carried out by a single author without institutional funding; the 0.8B experiments ran on the author's
+laptop and the 4B check on self-funded Google Colab compute. The author used Claude (Anthropic) as an assistant for code development and manuscript editing; all
 experiments, analyses and claims were designed, run and verified by the author.
 
 \section*{Reproducibility and Data Availability}
@@ -761,8 +785,9 @@ KVdrop\_Szeroconv & drop & $0_C$ & all & image & P5 & 0 & 0 \\
 \end{table*}
 
 \section{Compute}\label{app:compute}
-One Apple M3 Pro laptop (18\,GB unified memory, MPS backend). Seconds are summed per-sample wall time of the
-evaluation (two-stage prefill, teacher-forced pass, greedy decoding) from \texttt{results/mac/compute\_log.jsonl},
+0.8B: one Apple M3 Pro laptop (18\,GB unified memory, MPS backend); 4B: one NVIDIA A100-SXM4-40GB on Google
+Colab (4.0 compute units by the logged estimate). Seconds are summed per-sample wall time of the
+evaluation (two-stage prefill, teacher-forced pass, greedy decoding) from \texttt{results/\{mac,colab\}/compute\_log.jsonl},
 excluding model loading and data download. Cells shared between phases are run once and counted in the first phase
 that runs them. The process footprint, including MPS memory, stayed near 8\,GB as read by the live monitor; it is
 not recorded in the result rows.
@@ -778,7 +803,7 @@ phase 3 & 0.8B & 4,500 & 0.54 & 0.67 \\
 phase 5 & 0.8B & 2,700 & 0.78 & 0.59 \\
 \midrule
 total & 0.8B & 23,400 & 0.72 & 4.67 \\
-check (4B, A100, Colab) & 4B & \TBD{2,800} & & \\
+check (4B, A100) & 4B & 2,800 & 0.58 & 0.45 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}

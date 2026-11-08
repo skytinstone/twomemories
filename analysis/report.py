@@ -8,7 +8,7 @@ import argparse
 from collections import defaultdict
 from pathlib import Path
 
-from analysis.make_tables import REPO, Index, load_rows, table2, table5
+from analysis.make_tables import NLL_NOTE, REPO, Index, load_rows, table2, table3, table5
 from twomem.runner import read_jsonl
 
 
@@ -39,11 +39,16 @@ def render(phase: str | None, model: str, allow_local: bool, results: Path = REP
         sps = g["seconds"] / g["samples"] if g["samples"] else float("nan")
         out.append(f"| {gpu} | {g['cells']} | {g['samples']} | {g['seconds']:.0f} | {sps:.2f} | {g['units']:.2f} | "
                    f"{g['vram']:.1f} |")
-    md2, _ = table2(idx, model)
+    md2, _ = table2(idx, model, "acc")
+    md2n, _ = table2(idx, model, "nll")
+    md3, _ = table3(idx, model)
     md5, _ = table5(idx, model)
-    out += ["", "## Table 2: 충실도 × 태스크, retained [95% CI] / fidelity x task", "", md2,
+    out += ["", "## Table 2: 충실도 × 태스크, 정확도 retained [95% CI] (주 지표) / accuracy retained (primary)", "", md2,
+            "", "## Table 2nll: 같은 표, loss retained / loss retained", "", md2n, "", NLL_NOTE,
+            "", "## Table 3: 태스크 점수 / task scores (POPE: acc / F1)", "", md3,
             "", "## Table 5: 토큰 × KV 비트 / tokens x KV bits (같은 MB 묶음 / iso-MB groups)", "", md5, "",
-            "n/e = 평가 안 함 / not evaluated. retained = (NLL_blind − NLL_cond)/(NLL_blind − NLL_full), "
+            "n/e = 평가 안 함 / not evaluated. acc retained = (s_cond − s_blind)/(s_full − s_blind), "
+            "loss retained = (NLL_blind − NLL_cond)/(NLL_blind − NLL_full), "
             "데이터셋 수준 / dataset level, paired bootstrap n=2000."]
     return "\n".join(out) + "\n"
 

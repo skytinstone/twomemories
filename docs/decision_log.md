@@ -115,3 +115,10 @@ whole-scope EF의 잔차 공유 문제(paper_notes)는 이 태그에서 고치�
 - `run_phase.py` sanity gate: 각 태스크의 full 셀이 끝나면 정확도가 0.1 미만일 때 exit 3으로 멈춘다(run_all 체인도 멈춤).
 - 테스트: 0.8B 프로세서에 4B chat template을 씌워 프롬프트가 `<think>\n\n</think>\n\n`으로 끝나는지 확인. 수정 전 코드에서 실패, 수정 후 통과.
 - 태그 v0.4-nothink는 phase 1–5를 모두 담는다(v0.3-channels 대체). 노트북 셀 2·3과 setup 기본 ref 변경.
+
+### D-30. preprint 본 실험은 0.8B, 맥(MPS)에서 — 확정 (사용자 승인, 번복: CLAUDE.md "로컬 수치는 논문에 쓰지 않는다"의 범위)
+근거: v0.2-main 무효(D-29) 뒤 남은 Colab 유닛이 적고 다른 실험에도 써야 한다. 0.8B는 4B와 같은 3 GDN : 1 attention 반복과 early fusion(24층 중 attention 6층, H_kv=2, GDN value head 16)이고, 메모리 교차점도 n_v* = 1536으로 같다(state 18.87 MB, KV 12.29 kB/token, budget.py). 맥 점검(태스크당 50샘플, full·blind): 정확도 full/blind DocVQA 0.88/0.07, ChartQA 0.66/0.16, TextVQA 0.78/0.07, POPE 0.90/0.48. NLL/토큰 차이 1.9–5.0. 샘플당 0.4–1.5 s, RSS 3.1 GB.
+- 결과 디렉터리 `results/mac`(커밋함). `results/local`의 5샘플 preflight는 계속 검증용. 두 디렉터리를 같이 읽으면 Index가 sample_id로 중복 제거할 때 옛 줄을 고를 수 있으므로 표는 `--results results/mac`로만 만든다.
+- phase 1, 2, 3, 5를 `run_phase.py --model Qwen/Qwen3.5-0.8B --out results/mac`로 하나씩 돌리고, phase마다 결과를 확인한 뒤 다음으로 넘어간다. phase 4(9B 규모)는 맥에서 하지 않는다.
+- 한계(논문에 명시): 모델 1개, MPS bf16, GDN·conv는 transformers의 PyTorch 참조 구현(fla·causal_conv1d 없음). 4B 확인 실험(Colab 약 12유닛)은 유닛 상황을 보고 따로 정한다.
+- whole-scope EF 잔차 공유 문제는 그대로다. `KV4_S8ef_whole`의 pred/score만 영향, NLL·retained는 무관. 표에 표시한다.

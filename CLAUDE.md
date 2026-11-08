@@ -12,7 +12,7 @@
 - prefill은 2단: (prefix + image) → 개입 → (question). gold NLL은 그 뒤 forward 1회, decode는 greedy 16토큰.
 - scope=whole: 첫 논문 설정(전 토큰, decode 매 토큰, hybridquant 기본 훅).
 - retained = (NLL_blind − NLL_cond) / (NLL_blind − NLL_full). 데이터셋 수준 비율만, CI는 대응(paired) 부트스트랩(n=2000, seed 0). 샘플별 비율은 만들지 않는다.
-- 논문·보고서 수치는 `results/**/*.jsonl`에서만 가져온다. 로컬(맥) preflight 수치는 검증용이며 논문에 쓰지 않는다.
+- 논문·보고서 수치는 `results/**/*.jsonl`에서만 가져온다. 로컬(맥) preflight(`results/local`, 5샘플) 수치는 검증용이며 논문에 쓰지 않는다. 0.8B 본 실험은 맥에서 전체 subset으로 `results/mac`에 새로 돌린 결과만 쓴다(D-30). 표·그림은 `--results results/mac --allow-local`로 만든다.
 - 모든 결과 줄에 commit 해시. Colab에서는 코드 편집 금지: 맥에서 고치고 새 태그를 push한 뒤 Colab에서 재체크아웃.
 - 확인 안 된 것은 UNVERIFIED로 적는다. 결정 번복 시 decision_log에서 지우지 않고 새 항목으로 덧붙인다.
 - 코드 주석은 영어, 문서는 한국어.
@@ -37,7 +37,7 @@ MB = KV(n_vis + n_text, kv_bits) + State(state_bits). state는 토큰 수와 무
 
 - Colab 유닛 350, 단발. phase별 상한은 `configs/compute.yaml`의 `phase_caps`(preflight 15 / phase1 60 / phase2 80 / phase3 60 / phase4 105). `run_phase.py`가 상한에 닿으면 멈춘다.
 - 단계별 중단 규칙은 각 `configs/phase*.yaml`의 `stop_rule`. phase가 끝날 때마다 결과를 보고 다음 phase를 수동으로 승인한다.
-- 0.8B 전 경로 검증은 맥에서(유닛 0). Colab은 4B 이상 본 실험만.
+- 0.8B는 맥에서(유닛 0): 전 경로 검증과 preprint 본 실험(D-30). Colab은 4B 이상 확인 실험만.
 
 ## 명령
 

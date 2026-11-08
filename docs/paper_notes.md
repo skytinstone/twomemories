@@ -68,3 +68,8 @@
 - B. Two Memories of an Image: KV Cache and Recurrent State in Hybrid Vision-Language Models
 - C. What a Hybrid Vision-Language Model Remembers of an Image
 - D. 결론형(예: The Image Lives in the KV Cache: …), 결과가 분명할 때
+
+## 2단 전환 (2026-11-09, 사용자 요청)
+- 1단(NeurIPS 2017 재현) → 2단: 본문 7×9인치, 단 간격 0.25인치, 제목·저자만 두 단에 걸침. 21쪽 → 16쪽(본문 11쪽).
+- 넓은 것은 figure*/table*: Fig 1(구조도), Fig 2(전체 retained), 주 결과 표, 부록 결과 표와 조건 표. 나머지 그림(Fig 3–5)은 단 폭(3.4인치, 글자 7pt)으로 다시 그려 축소 없이 넣는다.
+- 표는 `adjustbox`의 `max width`로, 넘칠 때만 줄인다(이전 `resizebox`는 좁은 표를 키웠다).

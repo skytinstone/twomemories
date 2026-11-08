@@ -2,14 +2,14 @@
 % Results are placeholders (\TBD) until phases 1, 2, 3 and 5 of Qwen3.5-0.8B are in (results/mac, D-30).
 % Primary metric: accuracy retained; loss retained reported alongside (D-31).
 % Every number outside \TBD comes from the code, the model configs or docs/assumptions.md.
-\documentclass[10pt]{article}
-% Layout and type follow the NeurIPS 2017 style (as in "Attention Is All You Need"): one column, 5.5in x 9in text
-% block, Times text with Computer Modern math, no paragraph indent, title between rules.
-\usepackage[letterpaper,textwidth=5.5in,textheight=9in,top=1in,hcentering]{geometry}
+\documentclass[10pt,twocolumn]{article}
+% Two columns (7in x 9in text block, 0.25in gutter), Times text with Computer Modern math, no paragraph indent,
+% title between rules across both columns. Wide figures and tables use figure*/table*.
+\usepackage[letterpaper,textwidth=7in,textheight=9in,top=1in,columnsep=0.25in,hcentering]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage{times}
 \usepackage{amsmath,amssymb,amsthm}
-\usepackage{booktabs,multirow,array}
+\usepackage{booktabs,multirow,array,adjustbox}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{url}
@@ -23,8 +23,10 @@
 \renewcommand{\topfraction}{0.9}
 \renewcommand{\textfraction}{0.1}
 \renewcommand{\floatpagefraction}{0.75}
+\renewcommand{\dbltopfraction}{0.9}
+\renewcommand{\dblfloatpagefraction}{0.75}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{5.5pt}
+\setlength{\parskip}{4pt}
 \makeatletter
 \renewcommand\section{\@startsection{section}{1}{\z@}{-2.0ex plus -0.5ex minus -0.2ex}{1.5ex plus 0.3ex minus 0.2ex}{\large\bfseries\raggedright}}
 \renewcommand\subsection{\@startsection{subsection}{2}{\z@}{-1.8ex plus -0.5ex minus -0.2ex}{0.8ex plus 0.2ex}{\normalsize\bfseries\raggedright}}
@@ -40,20 +42,22 @@
 
 \begin{document}
 
+\twocolumn[{
 \begin{center}
-\rule{\textwidth}{4pt}\\[0.25in]
+\rule{\textwidth}{4pt}\\[0.2in]
 {\fontsize{17}{20}\selectfont\bfseries Where Does the Image Live?\\[2pt]
 KV Cache and Recurrent State in Hybrid Vision-Language Models\par}
-\vspace{0.22in}\rule{\textwidth}{1pt}\\[0.3in]
+\vspace{0.18in}\rule{\textwidth}{1pt}\\[0.2in]
 \textbf{Minseok Shin}\\
 Horcrux Technologies, Seoul, Republic of Korea\\
 \texttt{horcruxtech.ai@gmail.com}\quad\texttt{stevenshin16@korea.ac.kr}
 \end{center}
-\vspace{0.15in}
+\vspace{0.25in}
+}]
 
 \begin{center}{\large\bfseries Abstract}\end{center}
 \vspace{-0.5ex}
-\begin{list}{}{\leftmargin=0.5in\rightmargin=0.5in}\item[]
+\begin{list}{}{\leftmargin=0.15in\rightmargin=0.15in}\item[]
 Hybrid vision-language models that interleave linear-attention layers with softmax attention read an image into
 two memories at once: the key-value (KV) rows of the visual tokens in the attention layers, and a fixed-size
 recurrent state in the linear-attention layers that has absorbed every visual token. Visual-token pruning and
@@ -76,9 +80,9 @@ retained ratio while accuracy barely changes. \TBD{one sentence on the 4B check.
 
 \section{Introduction}
 
-\begin{figure}[tbp]
+\begin{figure*}[tbp]
 \centering
-\resizebox{0.97\textwidth}{!}{\input{figures/architecture.tex}}
+\resizebox{0.66\textwidth}{!}{\input{figures/architecture.tex}}
 \caption{Qwen3.5 as a hybrid VLM and the two memories it keeps. Left: the decoder stack (pre-norm layers, six
 groups of three Gated DeltaNet layers and one gated attention layer for 0.8B; eight for 4B and 9B); visual tokens from the vision
 encoder replace placeholder tokens at the input embedding (early fusion). Right: the recurrent state of each GDN
@@ -87,7 +91,7 @@ in orange). The prompt is read in two stages; right after the last image token (
 by $f$ on the visual KV rows or by $g$ on the state (red), and the question and the answer then read the altered
 memory.}
 \label{fig:overview}
-\end{figure}
+\end{figure*}
 
 A transformer vision-language model (VLM) keeps everything it has read about an image in one place: the keys and
 values of the visual tokens, one row per token and layer. Visual-token pruning
@@ -258,6 +262,7 @@ in \citep{shin2026hybridquant} counts the state in bf16; the implementation used
 \caption{Cache geometry, from the model configurations. Sizes by \eqref{eq:sizes}; KV in bf16, state in fp32.}
 \label{tab:geometry}
 \setlength{\tabcolsep}{3.2pt}
+\begin{adjustbox}{max width=\columnwidth}
 \begin{tabular}{lcccccccc}
 \toprule
 Model & $L$ & $L_a$ & $L_g$ & $H_{kv}$ & $d$ & $H$ & $d_k{=}d_v$ & $|S|$ (MB) \\
@@ -266,7 +271,8 @@ Qwen3.5-0.8B & 24 & 6 & 18 & 2 & 256 & 16 & 128 & 18.9 \\
 Qwen3.5-4B & 32 & 8 & 24 & 4 & 256 & 32 & 128 & 50.3 \\
 Qwen3.5-9B & 32 & 8 & 24 & 4 & 256 & 32 & 128 & 50.3 \\
 \bottomrule
-\end{tabular}\\[2pt]
+\end{tabular}
+\end{adjustbox}\\[2pt]
 \footnotesize GDN key heads: 16 in all three; the state is per value head. Query heads: 8 (0.8B), 16 (4B, 9B).
 Vision encoder: patch 16, merge 2; depth 12 (0.8B), 24 (4B), 27 (9B). Only 0.8B is run in this version.
 \end{table}
@@ -323,7 +329,10 @@ range: 3.3\% at 4 bits, 0.79\% at 6 bits and 0.20\% at 8 bits.
 \paragraph{Matched noise.} $N_b$ adds Gaussian noise with the energy of $b$-bit quantization error but none of its
 structure. For a cache tensor $X$ (one layer's visual keys, values, or state),
 \begin{equation}
-N_b(X) = X + \rho_b(X)\,Z,\quad \rho_b(X) = \sqrt{\tfrac{1}{|X|}\textstyle\sum\big(Q_b(X)-X\big)^2},
+\begin{aligned}
+N_b(X) &= X + \rho_b(X)\,Z,\\
+\rho_b(X) &= \sqrt{\tfrac{1}{|X|}\textstyle\sum\big(Q_b(X)-X\big)^2},
+\end{aligned}
 \label{eq:noise}
 \end{equation}
 with $Z$ standard normal entries of the shape of $X$. The generator is re-seeded (seed 0) for every tensor, so
@@ -526,22 +535,22 @@ defined on every task; POPE has the smallest gap (0.40). Figure~\ref{fig:retaine
 condition and Table~\ref{tab:main} the accuracy ratio; the loss ratio and the raw scores are in
 Appendix~\ref{app:results}.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=0.95\textwidth]{figures/retained_Qwen3.5-0.8B.pdf}
+\includegraphics[width=0.75\textwidth]{figures/retained_Qwen3.5-0.8B.pdf}
 \caption{Accuracy retained $\ret$ (filled) and loss retained $\ret_{\NLL}$ (open) with 95\% paired bootstrap
 intervals, Qwen3.5-0.8B. $1$: the altered cache supplies the image's full gain; $0$ (dashed): none of it. The loss
 ratio on DocVQA and POPE mixes in the letter case of the reference (Section~\ref{sec:metric}).}
 \label{fig:retained}
-\end{figure}
+\end{figure*}
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering\small
 \caption{Accuracy retained $\ret$ [95\% CI] per condition and task, Qwen3.5-0.8B. KV and state levels as in
 Section~\ref{sec:interventions}; ``ef'': error feedback; ``whole'': every-write quantization of the whole run.}
 \label{tab:main}
-\resizebox{\textwidth}{!}{\input{tables/Qwen3.5-0.8B/table2.tex}}
-\end{table}
+\begin{adjustbox}{max width=\textwidth}\input{tables/Qwen3.5-0.8B/table2.tex}\end{adjustbox}
+\end{table*}
 
 \subsection{Which memory carries the image}\label{sec:res-probe}
 \paragraph{The KV rows are necessary for reading.} Zeroing the visual KV rows leaves $\ret=0.02$, $0.02$ and $0.07$
@@ -572,7 +581,7 @@ not matter.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/fig_channels.pdf}
+\includegraphics[width=\columnwidth]{figures/fig_channels.pdf}
 \caption{Accuracy retained when carriers of the image are removed (95\% CI). ``Zero'' keeps the zeroed KV rows in
 the softmax; ``drop'' removes them. ``State zero'' leaves the convolution cache, which still holds the last three
 visual tokens; $0_C$ clears it too.}
@@ -604,7 +613,7 @@ its gain with no visual KV rows at all.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.8\textwidth]{figures/fig_tokens_bits.pdf}
+\includegraphics[width=\columnwidth]{figures/fig_tokens_bits.pdf}
 \caption{Accuracy retained against the bits that the image's KV rows cost per element and original visual token
 ($\kappa\,b_{kv}$), with 95\% CI. Each line deletes visual tokens uniformly ($\kappa=1,0.5,0.25$) at a fixed KV
 bit-width. Dotted: the equal-cost pair (all tokens at 4 bits; a quarter of the tokens at 16 bits).}
@@ -693,7 +702,8 @@ figures by \texttt{python analysis/figures.py}. Quantization uses the released \
 Checked against transformers 5.22.2 (Qwen3.5 modeling and cache code) before any run; file and line references
 are in \texttt{docs/assumptions.md} of the repository.
 \begin{center}\small
-\begin{tabular}{p{0.04\textwidth}p{0.42\textwidth}p{0.44\textwidth}}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{0.04\linewidth}p{0.42\linewidth}p{0.42\linewidth}}
 \toprule
 & Premise & Consequence for the method \\
 \midrule
@@ -714,6 +724,7 @@ Error feedback during the image needs one forward call per 256-token chunk \eqre
 The 22 conditions of phases 1--3 and the three of phase 5, run on Qwen3.5-0.8B, with the phases that run them;
 the five marked P4 form the planned 9B phase, which is not run in this version.
 Bits are the charges of \eqref{eq:mb}. Every task also has the blind anchor.
+\begin{table*}[h]
 \begin{center}\small
 \begin{tabular}{lllccccc}
 \toprule
@@ -747,6 +758,7 @@ KVdrop\_Szeroconv & drop & $0_C$ & all & image & P5 & 0 & 0 \\
 \bottomrule
 \end{tabular}
 \end{center}
+\end{table*}
 
 \section{Compute}\label{app:compute}
 One Apple M3 Pro laptop (18\,GB unified memory, MPS backend). Seconds are summed per-sample wall time of the
@@ -755,6 +767,7 @@ excluding model loading and data download. Cells shared between phases are run o
 that runs them. The process footprint, including MPS memory, stayed near 8\,GB as read by the live monitor; it is
 not recorded in the result rows.
 \begin{center}\small
+\begin{adjustbox}{max width=\columnwidth}
 \begin{tabular}{llrrr}
 \toprule
 Run & Model & samples & s/sample & hours \\
@@ -768,6 +781,7 @@ total & 0.8B & 23,400 & 0.72 & 4.67 \\
 check (4B, A100, Colab) & 4B & \TBD{2,800} & & \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{center}
 
 \section{Loss and accuracy on POPE}\label{app:pope-case}
@@ -779,7 +793,7 @@ and 0.26 after $Q_6$, while the reference is always lower case.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.55\textwidth]{figures/fig_case.pdf}
+\includegraphics[width=\columnwidth]{figures/fig_case.pdf}
 \caption{Loss retained against accuracy retained, one point per condition and task (Qwen3.5-0.8B). Dashed: equality.}
 \label{fig:case}
 \end{figure}
@@ -788,26 +802,26 @@ and 0.26 after $Q_6$, while the reference is always lower case.
 Generated by \texttt{analysis/make\_tables.py} from \texttt{results/mac}. $^\dagger$: the loss ratio mixes in the letter
 case of the reference (Section~\ref{sec:metric}).
 
-\begin{table}[h]
+\begin{table*}[h]
 \centering\small
 \caption{Loss retained $\ret_{\NLL}$ [95\% CI], Qwen3.5-0.8B.}
 \label{tab:nll}
-\resizebox{\textwidth}{!}{\input{tables/Qwen3.5-0.8B/table2nll.tex}}
-\end{table}
+\begin{adjustbox}{max width=\textwidth}\input{tables/Qwen3.5-0.8B/table2nll.tex}\end{adjustbox}
+\end{table*}
 
-\begin{table}[h]
+\begin{table*}[h]
 \centering\small
 \caption{Task scores: ANLS (DocVQA), relaxed accuracy (ChartQA), VQA accuracy (TextVQA), accuracy / F1 (POPE).}
 \label{tab:scores}
-\input{tables/Qwen3.5-0.8B/table3.tex}
-\end{table}
+\begin{adjustbox}{max width=\textwidth}\input{tables/Qwen3.5-0.8B/table3.tex}\end{adjustbox}
+\end{table*}
 
-\begin{table}[h]
+\begin{table*}[h]
 \centering\small
 \caption{Visual tokens kept (uniform) $\times$ KV bits: charged MB \eqref{eq:mb} and both retained ratios. MB group:
 totals within 10\%; the 18.9\,MB state dominates every total.}
 \label{tab:tokens}
-\resizebox{\textwidth}{!}{\input{tables/Qwen3.5-0.8B/table5.tex}}
-\end{table}
+\begin{adjustbox}{max width=\textwidth}\input{tables/Qwen3.5-0.8B/table5.tex}\end{adjustbox}
+\end{table*}
 
 \end{document}

@@ -29,7 +29,7 @@ def main(argv=None):
     if not any(idx.retained(args.model, t, c, m) for t in TASKS for c in TABLE2_ROWS for m in ("acc", "nll")):
         print(f"no retained values for {args.model} yet; no figure")
         return
-    fig, axes = plt.subplots(2, 2, figsize=(8, 9), sharey=True)
+    fig, axes = plt.subplots(2, 2, figsize=(8, 7.4), sharey=True)
     axes = axes.ravel()
     handles = {}
     for ax, t in zip(axes, TASKS):
